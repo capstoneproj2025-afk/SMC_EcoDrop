@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# Railway Build Script with Automatic Superuser Creation
+# Render Build Script with Automatic Superuser Creation
 
 set -o errexit  # Exit on error
 
-echo "🚀 Starting Railway build process..."
+echo "🚀 Starting Render build process..."
 
 # Install dependencies
 echo "📦 Installing Python dependencies..."
