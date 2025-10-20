@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block title %}Device Activity Logs - Admin Console{% endblock %}
+{% block content %}
+<div class="card">
+  <h1>📋 Device Activity Logs</h1>
+  <p style="color:#666; margin: 10px 0 20px;">Monitor device activity and errors (showing last 200 logs)</p>
+  
+  <div style="overflow-x:auto;">
+    <table style="width:100%; border-collapse:collapse;">
+      <thead>
+        <tr style="background:#f8f9fa;">
+          <th style="padding:10px;border-bottom:2px solid #e5e7eb;text-align:left;">Time</th>
+          <th style="padding:10px;border-bottom:2px solid #e5e7eb;text-align:left;">Device</th>
+          <th style="padding:10px;border-bottom:2px solid #e5e7eb;text-align:left;">Activity Type</th>
+          <th style="padding:10px;border-bottom:2px solid #e5e7eb;text-align:left;">Result</th>
+          <th style="padding:10px;border-bottom:2px solid #e5e7eb;text-align:left;">Message</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for log in logs %}
+        <tr>
+          <td style="padding:10px;border-bottom:1px solid #e5e7eb;">{{ log.created_at|date:"M d, H:i:s" }}</td>
+          <td style="padding:10px;border-bottom:1px solid #e5e7eb;">{{ log.device.device_name }}</td>
+          <td style="padding:10px;border-bottom:1px solid #e5e7eb;">
+            {% if log.log_type == 'bottle_detected' %}
+              🔍 Detection
+            {% elif log.log_type == 'bottle_sorted' %}
+              ✅ Sorted
+            {% elif log.log_type == 'error' %}
+              ❌ Error
+            {% elif log.log_type == 'heartbeat' %}
+              💓 Heartbeat
+            {% else %}
+              🔧 {{ log.log_type|title }}
+            {% endif %}
+          </td>
+          <td style="padding:10px;border-bottom:1px solid #e5e7eb;">
+            {% if log.sort_result == 'plastic' %}
+              <span style="color: #28a745;">✓ Valid</span>
+            {% elif log.sort_result == 'invalid' %}
+              <span style="color: #dc3545;">✗ Invalid</span>
+            {% elif log.sort_result == 'error' %}
+              <span style="color: #ffc107;">⚠ Error</span>
+            {% else %}
+              -
+            {% endif %}
+          </td>
+          <td style="padding:10px;border-bottom:1px solid #e5e7eb;">{{ log.message|truncatechars:80 }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5" style="padding:16px;text-align:center;color:#666;">No logs yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

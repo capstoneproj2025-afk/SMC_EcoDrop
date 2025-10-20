@@ -1,0 +1,70 @@
+{% extends 'core/base_dashboard.html' %}
+{% load static %}
+
+{% block title %}Rewards - EcoDrop{% endblock %}
+
+{% block sidebar %}
+<div class="nav-section">
+    <div class="nav-title">navigation</div>
+    <ul>
+        <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
+        <li><a href="{% url 'student_profile' %}">Profile</a></li>
+        <li><a href="{% url 'rewards' %}" class="active">Rewards</a></li>
+    </ul>
+</div>
+<div class="nav-section" style="margin-top: auto;">
+    <ul>
+        <li><a href="{% url 'logout' %}" style="color: #e74c3c;">Logout</a></li>
+    </ul>
+</div>
+{% endblock %}
+
+{% block extra_styles %}
+<style>
+.rewards-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+.reward-card { background:#ffffff; border:1px solid #eef2f7; border-radius:12px; padding:16px; text-align:center; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+.reward-card .icon { font-size: 44px; margin-bottom: 8px; }
+.reward-card .title { font-weight:700; margin-bottom: 4px; }
+.reward-card .req { color:#6b7280; margin-bottom: 12px; }
+.btn { background:#4a90e2; color:#fff; padding:10px 20px; border:none; border-radius:6px; cursor:pointer; text-decoration:none; display:inline-block; }
+.btn:hover { background:#357abd; }
+.btn.disabled { background:#bdc3c7; cursor:not-allowed; }
+.tips { list-style:none; padding:0; margin:0; }
+.tips li { padding: 10px 0; border-bottom: 1px solid #f3f4f6; }
+</style>
+{% endblock %}
+
+{% block content %}
+            <section class="like-panel">
+                <h1 style="margin: 0 0 6px;">🎁 Available Rewards</h1>
+                <p style="margin: 0 0 16px;">You have <span class="points-badge">{{ user_points }} points</span></p>
+                {% if rewards %}
+                <div class="rewards-grid">
+                    {% for reward in rewards %}
+                    <div class="reward-card">
+                        <div class="icon">{{ reward.icon }}</div>
+                        <div class="title">{{ reward.reward_name }}</div>
+                        <div class="req">{{ reward.points_required }} pts required</div>
+                        {% if user_points >= reward.points_required %}
+                            <a href="{% url 'redeem_reward' reward.id %}" class="btn" onclick="return confirm('Redeem {{ reward.reward_name }} for {{ reward.points_required }} points?')">Redeem Now</a>
+                        {% else %}
+                            {% widthratio user_points -1 1 as neg_points %}
+                            <button class="btn disabled" disabled>Need {{ reward.points_required|add:neg_points }} more points</button>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                    <p class="empty">🎁 No rewards available at the moment. Check back later!</p>
+                {% endif %}
+            </section>
+
+            <section class="like-panel">
+                <h2>💡 How to Earn More Points</h2>
+                <ul class="tips">
+                    <li>🍶 Deposit 1 bottle = 10 points</li>
+                    <li>♻️ Use your QR code at any EcoDrop machine</li>
+                    <li>🌱 Help save the environment while earning rewards!</li>
+                </ul>
+            </section>
+{% endblock %}
