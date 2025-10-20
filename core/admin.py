@@ -4,6 +4,7 @@
 # ======================================================================
 
 from django.contrib import admin
+from django.utils.html import format_html
 from .models import UserProfile, Entry, RewardItem, RedeemedPoints, Device, DeviceLog
 import uuid
 
@@ -11,9 +12,45 @@ import uuid
 
 @admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):
-    list_display = ('user', 'total_points', 'qr_code_data')
-    search_fields = ('user__username', 'user__email', 'qr_code_data')
-    list_filter = ('total_points',)
+    list_display = ('user', 'student_id', 'user_type', 'total_points')
+    search_fields = ('user__username', 'user__email', 'student_id', 'qr_code_data')
+    list_filter = ('user_type', 'total_points')
+    # student_id is FULLY EDITABLE - not in readonly_fields
+    fields = ('user', 'student_id', 'user_type', 'id_generation_helper', 'total_points', 'qr_code_data')
+    readonly_fields = ('id_generation_helper',)
+    
+    def id_generation_helper(self, obj):
+        """Display helper text for ID generation"""
+        if obj.user_type == 'student':
+            suggested_id = UserProfile.generate_student_id()
+            return format_html(
+                '<div style="background: #e7f3ff; padding: 10px; border-radius: 5px;">'
+                '<strong>📋 Student ID Format:</strong> C22-0369<br>'
+                '<small>C = class, 22 = enrollment year, 0369 = student number</small><br><br>'
+                '<strong>💡 Suggested ID:</strong> <code>{}</code><br>'
+                '<small>You can manually enter any ID in the "Student id" field above</small>'
+                '</div>',
+                suggested_id
+            )
+        elif obj.user_type == 'teacher':
+            suggested_id = UserProfile.generate_faculty_id()
+            return format_html(
+                '<div style="background: #fff3e7; padding: 10px; border-radius: 5px;">'
+                '<strong>📋 Faculty ID Format:</strong> SMCIC-001-0001<br>'
+                '<small>SMCIC = institution, 001 = department, 0001 = faculty number</small><br><br>'
+                '<strong>💡 Suggested ID:</strong> <code>{}</code><br>'
+                '<small>You can manually enter any ID in the "Student id" field above</small>'
+                '</div>',
+                suggested_id
+            )
+        else:
+            return format_html(
+                '<div style="background: #f0f0f0; padding: 10px; border-radius: 5px;">'
+                '<small>ID generation helpers are for students and teachers only</small>'
+                '</div>'
+            )
+    
+    id_generation_helper.short_description = "ID Generation Helper (Optional)"
 
 @admin.register(Entry)
 class EntryAdmin(admin.ModelAdmin):
