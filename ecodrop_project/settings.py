@@ -27,13 +27,34 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-dev-key-change
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '192.168.1.23', 'ecodrop.ccshub.uk', '*']
+ALLOWED_HOSTS = [
+    '127.0.0.1', 
+    'localhost', 
+    '192.168.1.23',  # Local network IP
+    '10.62.179.225',  # Local network IP
+    'ecodrop.ccshub.uk',
+    'smc-ecodrop.onrender.com',  # Your actual Render URL
+    '*.onrender.com',  # Allow all Render subdomains
+    '*'
+]
 
 # CSRF Settings for production
 CSRF_TRUSTED_ORIGINS = [
     'https://ecodrop.ccshub.uk',
+    'https://smc-ecodrop.onrender.com',  # Your actual Render URL
     'http://localhost:8000',
     'http://127.0.0.1:8000',
+    'http://10.62.179.225:8000',  # Local network
+]
+
+# CORS Settings - Allow device API requests
+CORS_ALLOW_ALL_ORIGINS = True  # For device API calls
+CORS_ALLOW_CREDENTIALS = True
+
+# Exempt device API endpoints from CSRF (they use Bearer token auth)
+CSRF_EXEMPT_URLS = [
+    '/api/device/',
+    '/api/user/verify/',
 ]
 
 
@@ -46,12 +67,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders',  # For device API CORS support
     'core',  # Our main app
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',  # Add WhiteNoise for static files
+    'corsheaders.middleware.CorsMiddleware',  # CORS for device API - must be before CommonMiddleware
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',

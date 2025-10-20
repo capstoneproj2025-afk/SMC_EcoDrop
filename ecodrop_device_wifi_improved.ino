@@ -5,14 +5,24 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
 #include <WiFiClient.h>
+#include <WiFiClientSecure.h>  // For HTTPS support
 #include <ArduinoJson.h>
 
 // ===== CONFIG: Wi-Fi and API (edit these) =====
 const char* WIFI_SSID = "Vince";
 const char* WIFI_PASS = "vinceba1";
-const char* API_HOST  = "10.62.179.225";   // PC LAN IP or domain
-const uint16_t API_PORT = 8000;           // Back to original port
-const char* API_KEY  = "41c7fc4c-a9e5-46de-946d-f1db2526a9a7"; // same as Device.api_key in Django
+
+// PRODUCTION: Render deployment - HTTPS (Port 443)
+const char* API_HOST  = "smc-ecodrop.onrender.com";  // Your actual Render URL
+const uint16_t API_PORT = 443;                        // HTTPS port
+const bool USE_HTTPS = true;                          // Use HTTPS for production
+
+// LOCAL TESTING: Uncomment these 3 lines and comment out production above when testing locally
+// const char* API_HOST  = "10.62.179.225";   // Your PC LAN IP
+// const uint16_t API_PORT = 8000;            // Local Django dev server port
+// const bool USE_HTTPS = false;              // Use HTTP for local testing
+
+const char* API_KEY  = "41c7fc4c-a9e5-46de-946d-f1db2526a9a7";           // same as Device.device_id in Django
 const char* API_DEVICE_HEARTBEAT_PATH = "/api/device/heartbeat/";
 const char* API_DEVICE_DETECT_PATH    = "/api/device/detection/";
 const char* API_USER_VERIFY_PATH      = "/api/user/verify/";    // added: user verify endpoint
@@ -96,7 +106,7 @@ unsigned long lastLcdAt = 0;
 // ===== Scanner Auto-Trigger =====
 void triggerScanner() {
   digitalWrite(SCANNER_TRIGGER_PIN, LOW);   // Press button (connect to GND)
-  delay(5000);                               // Hold for 5 seconds
+  delay(100);                                // Hold for 100ms
   digitalWrite(SCANNER_TRIGGER_PIN, HIGH);  // Release button
 }
 
@@ -166,13 +176,24 @@ void connectWiFi() {
 }
 
 int httpGET(const String& url, const char* apiKey, String& respOut) {
-  WiFiClient net;
   HTTPClient http;
+  bool success = false;
   
-  Serial.print("HTTP: Attempting connection to: "); Serial.println(url);
+  Serial.print(USE_HTTPS ? "HTTPS" : "HTTP");
+  Serial.print(": Attempting connection to: "); Serial.println(url);
   
-  if (!http.begin(net, url)) {
-    Serial.println("HTTP: Failed to begin connection");
+  // Use HTTPS (WiFiClientSecure) or HTTP (WiFiClient) based on configuration
+  if (USE_HTTPS) {
+    WiFiClientSecure secureClient;
+    secureClient.setInsecure();  // Skip certificate verification for simplicity
+    success = http.begin(secureClient, url);
+  } else {
+    WiFiClient client;
+    success = http.begin(client, url);
+  }
+  
+  if (!success) {
+    Serial.println("Failed to begin connection");
     return -1;
   }
   
@@ -180,18 +201,18 @@ int httpGET(const String& url, const char* apiKey, String& respOut) {
   http.addHeader("User-Agent", "EcoDrop-Arduino/1.0");
   if (apiKey && apiKey[0]) {
     http.addHeader("Authorization", String("Bearer ") + apiKey);
-    Serial.println("HTTP: Added Authorization header");
+    Serial.println("Added Authorization header");
   }
   
-  Serial.println("HTTP: Sending GET request...");
+  Serial.println("Sending GET request...");
   int code = http.GET();
   
   if (code > 0) {
     respOut = http.getString();
-    Serial.print("HTTP: Success, response length: "); Serial.println(respOut.length());
+    Serial.print("Success, response length: "); Serial.println(respOut.length());
   } else {
-    Serial.print("HTTP: Error code: "); Serial.println(code);
-    Serial.print("HTTP: Error string: "); Serial.println(http.errorToString(code));
+    Serial.print("Error code: "); Serial.println(code);
+    Serial.print("Error string: "); Serial.println(http.errorToString(code));
   }
   
   http.end();
@@ -199,9 +220,21 @@ int httpGET(const String& url, const char* apiKey, String& respOut) {
 }
 
 int httpPOSTjson(const String& url, const char* apiKey, const String& jsonBody, String& respOut) {
-  WiFiClient net;
   HTTPClient http;
-  if (!http.begin(net, url)) return -1;
+  bool success = false;
+  
+  // Use HTTPS (WiFiClientSecure) or HTTP (WiFiClient) based on configuration
+  if (USE_HTTPS) {
+    WiFiClientSecure secureClient;
+    secureClient.setInsecure();  // Skip certificate verification for simplicity
+    success = http.begin(secureClient, url);
+  } else {
+    WiFiClient client;
+    success = http.begin(client, url);
+  }
+  
+  if (!success) return -1;
+  
   http.addHeader("Content-Type", "application/json");
   if (apiKey && apiKey[0]) http.addHeader("Authorization", String("Bearer ") + apiKey);
   int code = http.POST(jsonBody);
