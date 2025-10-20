@@ -439,6 +439,10 @@ def admin_user_edit_view(request, user_id: int):
             user_obj.profile.total_points = max(0, new_points)
         except Exception:
             pass
+        # Student/Faculty ID - EDITABLE
+        student_id = request.POST.get('student_id', '').strip()
+        if student_id:
+            user_obj.profile.student_id = student_id
         user_obj.save()
         user_obj.profile.save()
         return redirect('admin_users')
@@ -533,39 +537,53 @@ def admin_user_add_view(request):
         email = request.POST.get('email', '')
         user_type = request.POST.get('user_type', 'student')
         
-        # Recalculate IDs at time of creation to ensure latest available
+        # Get student/faculty ID from form (EDITABLE - admin can change it)
+        manual_student_id = request.POST.get('student_id', '').strip()
+        manual_faculty_id = request.POST.get('faculty_id', '').strip()
+        
+        # Use manual ID if provided, otherwise auto-generate
         if user_type == 'student':
-            last_student = UserProfile.objects.filter(
-                student_id__startswith=f'C{current_year}-'
-            ).order_by('-student_id').first()
-            
-            if last_student and last_student.student_id:
-                try:
-                    last_num = int(last_student.student_id.split('-')[1])
-                    generated_id = f'C{current_year}-{str(last_num + 1).zfill(4)}'
-                except:
+            if manual_student_id:
+                # Use the manually entered ID
+                generated_id = manual_student_id
+            else:
+                # Auto-generate only if not provided
+                last_student = UserProfile.objects.filter(
+                    student_id__startswith=f'C{current_year}-'
+                ).order_by('-student_id').first()
+                
+                if last_student and last_student.student_id:
+                    try:
+                        last_num = int(last_student.student_id.split('-')[1])
+                        generated_id = f'C{current_year}-{str(last_num + 1).zfill(4)}'
+                    except:
+                        generated_id = f'C{current_year}-0001'
+                else:
                     generated_id = f'C{current_year}-0001'
-            else:
-                generated_id = f'C{current_year}-0001'
         elif user_type == 'teacher':
-            from datetime import datetime
-            current_year_full = str(datetime.now().year)
-            last_faculty = UserProfile.objects.filter(
-                student_id__startswith='SMCIC-'
-            ).order_by('-student_id').first()
-            
-            if last_faculty and last_faculty.student_id:
-                try:
-                    parts = last_faculty.student_id.split('-')
-                    if len(parts) == 3:
-                        last_num = int(parts[1])
-                        generated_id = f'SMCIC-{str(last_num + 1).zfill(3)}-{current_year_full}'
-                    else:
-                        generated_id = f'SMCIC-001-{current_year_full}'
-                except:
-                    generated_id = f'SMCIC-001-{current_year_full}'
+            if manual_faculty_id:
+                # Use the manually entered ID
+                generated_id = manual_faculty_id
             else:
-                generated_id = f'SMCIC-001-{current_year_full}'
+                # Auto-generate only if not provided
+                from datetime import datetime
+                current_year_full = str(datetime.now().year)
+                last_faculty = UserProfile.objects.filter(
+                    student_id__startswith='SMCIC-'
+                ).order_by('-student_id').first()
+                
+                if last_faculty and last_faculty.student_id:
+                    try:
+                        parts = last_faculty.student_id.split('-')
+                        if len(parts) == 3:
+                            last_num = int(parts[1])
+                            generated_id = f'SMCIC-{str(last_num + 1).zfill(3)}-{current_year_full}'
+                        else:
+                            generated_id = f'SMCIC-001-{current_year_full}'
+                    except:
+                        generated_id = f'SMCIC-001-{current_year_full}'
+                else:
+                    generated_id = f'SMCIC-001-{current_year_full}'
         else:
             generated_id = None
         

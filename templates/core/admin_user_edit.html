@@ -128,6 +128,23 @@
             <input type="email" id="email" name="email" value="{{ u.email }}" class="form-input">
         </div>
 
+        <div class="form-group">
+            <label for="student_id">
+                {% if u.profile.user_type == 'student' %}Student ID{% elif u.profile.user_type == 'teacher' %}Faculty ID{% else %}ID Number{% endif %}
+            </label>
+            <input type="text" id="student_id" name="student_id" value="{{ u.profile.student_id }}" class="form-input" 
+                   placeholder="{% if u.profile.user_type == 'student' %}e.g., C25-0001{% elif u.profile.user_type == 'teacher' %}e.g., SMCIC-001-0001{% else %}Optional ID{% endif %}">
+            <small style="color: #667eea; font-size: 12px; display: block; margin-top: 4px;">
+                {% if u.profile.user_type == 'student' %}
+                    📋 Format: C22-0369 (C=class, 22=year, 0369=student number) | Fully editable
+                {% elif u.profile.user_type == 'teacher' %}
+                    📋 Format: SMCIC-001-0001 (SMCIC=institution, 001=dept, 0001=number) | Fully editable
+                {% else %}
+                    Optional ID field for this user
+                {% endif %}
+            </small>
+        </div>
+
         <div class="form-row">
             <div class="form-group">
                 <label for="total_points">Total Points</label>
