@@ -29,6 +29,19 @@
 .pts { color:#10b981; font-weight: 700; }
 .card { background:#fff; border-radius: 8px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
 .empty { text-align:center; color:#666; padding: 20px; }
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .kpi { min-width: 100%; }
+    .cards { flex-direction: column; }
+    .table-wrap th, .table-wrap td { padding: 8px; font-size: 0.9rem; }
+}
+@media (max-width: 576px) {
+    .kpi-value { font-size: 24px; }
+    .card { padding: 12px; }
+    .table-wrap { font-size: 0.85rem; }
+    .table-wrap th, .table-wrap td { padding: 6px; }
+}
 </style>
 {% endblock %}
 

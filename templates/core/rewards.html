@@ -51,10 +51,26 @@
 
 /* Responsive: 2 columns on tablets, 1 column on mobile */
 @media (max-width: 992px) {
-    .rewards-grid { grid-template-columns: repeat(2, 1fr); }
+    .rewards-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; }
+}
+@media (max-width: 768px) {
+    .rewards-header { font-size: 1.1rem; }
+    .search-bar input { max-width: 100%; }
+    .pagination { flex-wrap: wrap; padding: 15px 10px; gap: 4px; }
+    .pagination .page-btn { padding: 6px 10px; font-size: 0.85rem; }
 }
 @media (max-width: 576px) {
-    .rewards-grid { grid-template-columns: 1fr; }
+    .rewards-grid { grid-template-columns: 1fr; gap: 12px; }
+    .reward-header { height: 160px; }
+    .reward-body { padding: 12px; }
+    .modal-box { width: 95%; max-width: 100%; }
+    .receipt-modal { width: 95%; max-width: 100%; }
+    .modal-header { padding: 20px 15px; }
+    .receipt-header { padding: 20px 15px; }
+    .modal-body { padding: 15px; }
+    .receipt-body { padding: 15px; }
+    .modal-actions { flex-direction: column; }
+    .modal-btn { width: 100%; }
 }
 
 /* Modal Styles */
