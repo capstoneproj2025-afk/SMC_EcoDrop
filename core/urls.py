@@ -17,6 +17,7 @@ urlpatterns = [
     path('teacher-profile/', views.teacher_profile_view, name='teacher_profile'),
     path('student-profile/', views.student_profile_view, name='student_profile'),
     path('rewards/', views.rewards_view, name='rewards'),
+    path('rewards/history/', views.redemption_history_view, name='redemption_history'),
     path('redeem/<int:reward_id>/', views.redeem_reward_view, name='redeem_reward'),
     
     # URL for the admin dashboard (can be expanded later)

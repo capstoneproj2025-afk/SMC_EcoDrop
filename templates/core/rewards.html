@@ -7,9 +7,10 @@
 <div class="nav-section">
     <div class="nav-title">navigation</div>
     <ul>
-        <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
-        <li><a href="{% url 'student_profile' %}">Profile</a></li>
+        <li><a href="{% if user.is_staff %}{% url 'teacher_dashboard' %}{% else %}{% url 'dashboard' %}{% endif %}">Dashboard</a></li>
+        <li><a href="{% if user.is_staff %}{% url 'teacher_profile' %}{% else %}{% url 'student_profile' %}{% endif %}">Profile</a></li>
         <li><a href="{% url 'rewards' %}" class="active">Rewards</a></li>
+        <li><a href="{% url 'redemption_history' %}">Redemption History</a></li>
     </ul>
 </div>
 {% endblock %}
@@ -86,6 +87,39 @@
 .modal-btn.cancel:hover { background: #f5f5f5; }
 .modal-btn.confirm { background: #4285f4; color: white; }
 .modal-btn.confirm:hover { background: #3367d6; }
+
+/* Success Receipt Modal */
+.receipt-modal { background: white; border-radius: 12px; max-width: 450px; width: 90%; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.3); animation: modalSlideIn 0.3s ease; }
+.receipt-header { background: linear-gradient(135deg, #4CAF50, #45a049); color: white; padding: 30px 20px; text-align: center; position: relative; }
+.receipt-close { position: absolute; top: 10px; right: 15px; background: none; border: none; font-size: 24px; cursor: pointer; color: white; }
+.receipt-close:hover { opacity: 0.8; }
+.receipt-check { font-size: 50px; margin-bottom: 10px; }
+.receipt-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 5px; }
+.receipt-subtitle { font-size: 0.9rem; opacity: 0.9; }
+.receipt-body { padding: 20px; }
+.receipt-divider { border-top: 2px dashed #e0e0e0; margin: 15px 0; }
+.receipt-reward { text-align: center; padding: 20px 0; }
+.receipt-reward-icon { font-size: 50px; color: rgba(0,0,0,0.2); margin-bottom: 10px; }
+.receipt-reward-name { font-size: 1.2rem; font-weight: 700; color: #2c3e50; }
+.receipt-info { display: flex; justify-content: space-between; padding: 8px 0; font-size: 0.9rem; }
+.receipt-info .label { color: #666; }
+.receipt-info .value { font-weight: 600; color: #2c3e50; }
+.receipt-points { background: #fff3e0; padding: 12px; border-radius: 8px; margin: 15px 0; text-align: center; }
+.receipt-points-val { font-size: 1.5rem; font-weight: 700; color: #e65100; }
+.receipt-info-box { display: flex; flex-direction: column; gap: 12px; margin: 20px 0; }
+.info-row { display: flex; align-items: flex-start; gap: 12px; padding: 12px; border-radius: 8px; }
+.info-row.blue { background: #e3f2fd; }
+.info-row.yellow { background: #fff9e6; }
+.info-row i { font-size: 20px; color: #666; margin-top: 2px; }
+.info-row.blue i { color: #1976d2; }
+.info-row.yellow i { color: #f57c00; }
+.info-label { font-size: 0.8rem; color: #666; margin-bottom: 2px; }
+.info-value { font-size: 1rem; font-weight: 600; color: #2c3e50; }
+.receipt-points-deducted { display: flex; justify-content: space-between; align-items: center; font-size: 0.95rem; margin-bottom: 15px; }
+.receipt-points-deducted .points-value { font-size: 1.1rem; font-weight: 700; color: #333; }
+.receipt-notice { background: #e8f5e9; padding: 12px; border-radius: 8px; font-size: 0.85rem; color: #2e7d32; text-align: center; }
+.receipt-done-btn { width: 100%; padding: 12px; background: #4285f4; color: white; border: none; border-radius: 6px; font-size: 1rem; font-weight: 600; cursor: pointer; margin-top: 15px; }
+.receipt-done-btn:hover { background: #3367d6; }
 </style>
 {% endblock %}
 
@@ -291,6 +325,86 @@
             closeRedeemModal();
         }
     });
+    
+    {% if last_redemption %}
+    // Auto-show success modal after redemption
+    window.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('successModal').classList.add('active');
+    });
+    {% endif %}
+    
+    // Success modal close handlers
+    function closeSuccessModal() {
+        document.getElementById('successModal').classList.remove('active');
+    }
+    
+    var successCloseBtn = document.getElementById('successCloseBtn');
+    if (successCloseBtn) {
+        successCloseBtn.addEventListener('click', closeSuccessModal);
+    }
+    
+    var successDoneBtn = document.getElementById('successDoneBtn');
+    if (successDoneBtn) {
+        successDoneBtn.addEventListener('click', closeSuccessModal);
+    }
+    
+    var successModal = document.getElementById('successModal');
+    if (successModal) {
+        successModal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeSuccessModal();
+            }
+        });
+    }
 })();
 </script>
+
+<!-- Success Modal (shown after redemption) -->
+{% if last_redemption %}
+<div class="modal-overlay active" id="successModal">
+    <div class="receipt-modal">
+        <div class="receipt-header">
+            <button class="receipt-close" id="successCloseBtn">&times;</button>
+            <div class="receipt-check"><i class="fas fa-check-circle"></i></div>
+            <div class="receipt-title">Redemption Successful!</div>
+            <div class="receipt-subtitle">Your reward is ready to use</div>
+        </div>
+        <div class="receipt-body">
+            <div class="receipt-divider"></div>
+            <div class="receipt-reward">
+                <div class="receipt-reward-icon"><i class="fas fa-recycle"></i></div>
+                <div class="receipt-reward-name">{{ last_redemption.reward_name }}</div>
+            </div>
+            <div class="receipt-divider"></div>
+            
+            <div class="receipt-info-box">
+                <div class="info-row blue">
+                    <i class="fas fa-calendar"></i>
+                    <div>
+                        <div class="info-label">Redemption Date</div>
+                        <div class="info-value">{{ last_redemption.redemption_date }}</div>
+                    </div>
+                </div>
+                <div class="info-row yellow">
+                    <i class="fas fa-clock"></i>
+                    <div>
+                        <div class="info-label">Valid Until</div>
+                        <div class="info-value">{{ last_redemption.valid_until }}</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="receipt-divider"></div>
+            <div class="receipt-points-deducted">
+                <span>Points Deducted</span>
+                <span class="points-value">-{{ last_redemption.points_deducted }} pts</span>
+            </div>
+            <div class="receipt-notice">
+                Show this receipt at the canteen to claim your reward
+            </div>
+            <button class="receipt-done-btn" id="successDoneBtn">Done</button>
+        </div>
+    </div>
+</div>
+{% endif %}
 {% endblock %}

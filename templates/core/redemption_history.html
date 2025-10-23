@@ -1,0 +1,235 @@
+{% extends 'core/base_dashboard.html' %}
+{% block title %}Redemption History - EcoDrop{% endblock %}
+
+{% block sidebar %}
+<div class="nav-section">
+    <div class="nav-title">navigation</div>
+    <ul>
+        <li><a href="{% if user.is_staff %}{% url 'teacher_dashboard' %}{% else %}{% url 'dashboard' %}{% endif %}">Dashboard</a></li>
+        <li><a href="{% if user.is_staff %}{% url 'teacher_profile' %}{% else %}{% url 'student_profile' %}{% endif %}">Profile</a></li>
+        <li><a href="{% url 'rewards' %}">Rewards</a></li>
+        <li><a href="{% url 'redemption_history' %}" class="active">Redemption History</a></li>
+    </ul>
+</div>
+{% endblock %}
+
+{% block extra_styles %}
+<style>
+.history-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.history-title { display: flex; align-items: center; gap: 10px; font-size: 1.3rem; font-weight: 700; }
+.back-btn { padding: 10px 20px; background: #e0e0e0; color: #333; border-radius: 6px; text-decoration: none; font-weight: 600; transition: all 0.2s; }
+.back-btn:hover { background: #d0d0d0; }
+.redemptions-list { display: flex; flex-direction: column; gap: 16px; }
+.redemption-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); display: flex; gap: 20px; align-items: center; transition: transform 0.2s; }
+.redemption-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
+.reward-icon-box { width: 80px; height: 80px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 40px; flex-shrink: 0; }
+.reward-icon-box.green { background: #b8e6d5; color: rgba(0,0,0,0.3); }
+.reward-icon-box.blue { background: #b3d9ff; color: rgba(0,0,0,0.3); }
+.reward-icon-box.beige { background: #f9dfa2; color: rgba(0,0,0,0.3); }
+.reward-icon-box.purple { background: #d4c5f9; color: rgba(0,0,0,0.3); }
+.redemption-details { flex: 1; }
+.reward-name-hist { font-size: 1.2rem; font-weight: 700; color: #2c3e50; margin-bottom: 8px; }
+.redemption-meta { display: flex; gap: 20px; flex-wrap: wrap; }
+.meta-item { display: flex; align-items: center; gap: 6px; font-size: 0.9rem; color: #666; }
+.meta-item i { color: #4285f4; }
+.points-used { background: #ffe5e5; color: #d32f2f; padding: 8px 16px; border-radius: 20px; font-weight: 700; white-space: nowrap; }
+.empty-state { text-align: center; padding: 60px 20px; color: #666; }
+.empty-state i { font-size: 60px; color: #ddd; margin-bottom: 16px; }
+.empty-state a { color: #4285f4; text-decoration: none; font-weight: 600; }
+.empty-state a:hover { text-decoration: underline; }
+.view-receipt-btn { padding: 8px 16px; background: #4285f4; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; transition: all 0.2s; }
+.view-receipt-btn:hover { background: #3367d6; }
+
+/* Receipt Modal */
+.modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center; }
+.modal-overlay.active { display: flex; }
+.receipt-modal { background: white; border-radius: 12px; max-width: 450px; width: 90%; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.3); animation: modalSlideIn 0.3s ease; }
+@keyframes modalSlideIn { from { transform: translateY(-50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+.receipt-header { background: linear-gradient(135deg, #4CAF50, #45a049); color: white; padding: 30px 20px; text-align: center; position: relative; }
+.receipt-close { position: absolute; top: 10px; right: 15px; background: none; border: none; font-size: 24px; cursor: pointer; color: white; }
+.receipt-close:hover { opacity: 0.8; }
+.receipt-check { font-size: 50px; margin-bottom: 10px; }
+.receipt-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 5px; }
+.receipt-subtitle { font-size: 0.9rem; opacity: 0.9; }
+.receipt-body { padding: 20px; }
+.receipt-divider { border-top: 2px dashed #e0e0e0; margin: 15px 0; }
+.receipt-reward { text-align: center; padding: 20px 0; }
+.receipt-reward-icon { font-size: 50px; color: rgba(0,0,0,0.2); margin-bottom: 10px; }
+.receipt-reward-name { font-size: 1.2rem; font-weight: 700; color: #2c3e50; }
+.receipt-info { display: flex; justify-content: space-between; padding: 8px 0; font-size: 0.9rem; }
+.receipt-info .label { color: #666; }
+.receipt-info .value { font-weight: 600; color: #2c3e50; }
+.receipt-info-box { display: flex; flex-direction: column; gap: 12px; margin: 20px 0; }
+.info-row { display: flex; align-items: flex-start; gap: 12px; padding: 12px; border-radius: 8px; }
+.info-row.blue { background: #e3f2fd; }
+.info-row.yellow { background: #fff9e6; }
+.info-row i { font-size: 20px; color: #666; margin-top: 2px; }
+.info-row.blue i { color: #1976d2; }
+.info-row.yellow i { color: #f57c00; }
+.info-label { font-size: 0.8rem; color: #666; margin-bottom: 2px; }
+.info-value { font-size: 1rem; font-weight: 600; color: #2c3e50; }
+.receipt-points { background: #fff3e0; padding: 12px; border-radius: 8px; margin: 15px 0; text-align: center; }
+.receipt-points-val { font-size: 1.5rem; font-weight: 700; color: #e65100; }
+.receipt-points-deducted { display: flex; justify-content: space-between; align-items: center; font-size: 0.95rem; margin-bottom: 15px; }
+.receipt-points-deducted .points-value { font-size: 1.1rem; font-weight: 700; color: #333; }
+.receipt-notice { background: #e8f5e9; padding: 12px; border-radius: 8px; font-size: 0.85rem; color: #2e7d32; text-align: center; }
+.receipt-done-btn { width: 100%; padding: 12px; background: #4285f4; color: white; border: none; border-radius: 6px; font-size: 1rem; font-weight: 600; cursor: pointer; margin-top: 15px; }
+.receipt-done-btn:hover { background: #3367d6; }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="like-panel">
+    <div class="history-header">
+        <div class="history-title">
+            <i class="fas fa-history"></i> Redemption History
+        </div>
+        <a href="{% url 'rewards' %}" class="back-btn">
+            <i class="fas fa-arrow-left"></i> Back to Rewards
+        </a>
+    </div>
+
+    {% if redemptions %}
+        <div class="redemptions-list">
+            {% for redemption in redemptions %}
+            <div class="redemption-card">
+                <div class="reward-icon-box {% cycle 'beige' 'green' 'blue' 'purple' %}">
+                    <i class="fas fa-recycle"></i>
+                </div>
+                <div class="redemption-details">
+                    <div class="reward-name-hist">{{ redemption.reward_item.reward_name }}</div>
+                    <div class="redemption-meta">
+                        <div class="meta-item">
+                            <i class="fas fa-calendar"></i>
+                            {{ redemption.created_at|date:"M d, Y" }}
+                        </div>
+                        <div class="meta-item">
+                            <i class="fas fa-clock"></i>
+                            {{ redemption.created_at|date:"h:i A" }}
+                        </div>
+                    </div>
+                </div>
+                <div class="points-used">-{{ redemption.redeemed_points }} pts</div>
+                <button class="view-receipt-btn" 
+                        data-reward-name="{{ redemption.reward_item.reward_name }}"
+                        data-redemption-date="{{ redemption.created_at|date:'F d, Y' }}"
+                        data-valid-until="{{ redemption.valid_until|date:'F d, Y' }}"
+                        data-points="{{ redemption.redeemed_points }}">
+                    <i class="fas fa-receipt"></i> View Receipt
+                </button>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <div><i class="fas fa-receipt"></i></div>
+            <h3>No Redemptions Yet</h3>
+            <p>You haven't redeemed any rewards yet.<br>
+            <a href="{% url 'rewards' %}">Browse available rewards</a> and start redeeming!</p>
+        </div>
+    {% endif %}
+</section>
+
+<!-- Receipt Modal -->
+<div class="modal-overlay" id="receiptModal">
+    <div class="receipt-modal">
+        <div class="receipt-header">
+            <button class="receipt-close" onclick="closeReceipt()">&times;</button>
+            <div class="receipt-check"><i class="fas fa-check-circle"></i></div>
+            <div class="receipt-title">Redemption Successful!</div>
+            <div class="receipt-subtitle">Your reward is ready to use</div>
+        </div>
+        <div class="receipt-body">
+            <div class="receipt-divider"></div>
+            <div class="receipt-reward">
+                <div class="receipt-reward-icon"><i class="fas fa-recycle"></i></div>
+                <div class="receipt-reward-name" id="receiptRewardName">Coffee Voucher</div>
+            </div>
+            <div class="receipt-divider"></div>
+            <div class="receipt-info-box">
+                <div class="info-row blue">
+                    <i class="fas fa-calendar"></i>
+                    <div>
+                        <div class="info-label">Redemption Date</div>
+                        <div class="info-value" id="receiptDate">October 23, 2025</div>
+                    </div>
+                </div>
+                <div class="info-row yellow">
+                    <i class="fas fa-clock"></i>
+                    <div>
+                        <div class="info-label">Valid Until</div>
+                        <div class="info-value" id="receiptValidUntil">November 22, 2025</div>
+                    </div>
+                </div>
+            </div>
+            <div class="receipt-divider"></div>
+            <div class="receipt-points-deducted">
+                <span>Points Deducted</span>
+                <span class="points-value">-<span id="receiptPoints">50</span> pts</span>
+            </div>
+            <div class="receipt-notice">
+                <i class="fas fa-info-circle"></i> Show this receipt at the canteen to claim your reward
+            </div>
+            <button class="receipt-done-btn">Done</button>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    // Event delegation for view receipt buttons
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.view-receipt-btn')) {
+            var btn = e.target.closest('.view-receipt-btn');
+            var rewardName = btn.getAttribute('data-reward-name');
+            var redemptionDate = btn.getAttribute('data-redemption-date');
+            var validUntil = btn.getAttribute('data-valid-until');
+            var points = btn.getAttribute('data-points');
+            
+            showReceipt(rewardName, redemptionDate, validUntil, points);
+        }
+    });
+    
+    function showReceipt(rewardName, redemptionDate, validUntil, points) {
+        document.getElementById('receiptRewardName').textContent = rewardName;
+        document.getElementById('receiptDate').textContent = redemptionDate;
+        document.getElementById('receiptValidUntil').textContent = validUntil;
+        document.getElementById('receiptPoints').textContent = points;
+        document.getElementById('receiptModal').classList.add('active');
+    }
+    
+    function closeReceipt() {
+        document.getElementById('receiptModal').classList.remove('active');
+    }
+    
+    // Close button
+    var closeBtn = document.querySelector('#receiptModal .receipt-close');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', closeReceipt);
+    }
+    
+    // Done button
+    var doneBtn = document.querySelector('#receiptModal .receipt-done-btn');
+    if (doneBtn) {
+        doneBtn.addEventListener('click', closeReceipt);
+    }
+    
+    // Close modal on click outside
+    var receiptModal = document.getElementById('receiptModal');
+    if (receiptModal) {
+        receiptModal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeReceipt();
+            }
+        });
+    }
+    
+    // Close modal on Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeReceipt();
+        }
+    });
+})();
+</script>
+{% endblock %}

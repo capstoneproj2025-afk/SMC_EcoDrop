@@ -209,11 +209,15 @@ def rewards_view(request):
     page_number = request.GET.get('page', 1)
     page_obj = paginator.get_page(page_number)
     
+    # Get last redemption from session and clear it
+    last_redemption = request.session.pop('last_redemption', None)
+    
     return render(request, 'core/rewards.html', {
         'rewards': page_obj,
         'user_profile': user_profile,
         'search_query': search_query,
         'page_obj': page_obj,
+        'last_redemption': last_redemption,
     })
 
 @login_required
@@ -227,17 +231,37 @@ def redeem_reward_view(request, reward_id):
         profile.save()
 
         # Create a redemption record
-        RedeemedPoints.objects.create(
+        redemption = RedeemedPoints.objects.create(
             user_profile=profile,
             reward_item=reward,
             redeemed_points=reward.points_required
         )
-        # You can add a success message here using Django's messages framework
-    else:
-        # You can add an error message here
-        pass
+        
+        # Calculate valid until date (30 days from now)
+        from datetime import timedelta
+        valid_until = redemption.created_at + timedelta(days=30)
+        
+        # Store redemption info in session for success modal
+        request.session['last_redemption'] = {
+            'reward_name': reward.reward_name,
+            'points_deducted': reward.points_required,
+            'redemption_date': redemption.created_at.strftime('%B %d, %Y'),
+            'redemption_time': redemption.created_at.strftime('%I:%M %p'),
+            'valid_until': valid_until.strftime('%B %d, %Y'),
+        }
     
     return redirect('rewards')
+
+@login_required
+def redemption_history_view(request):
+    """Display user's redemption history"""
+    user_profile = request.user.profile
+    redemptions = RedeemedPoints.objects.filter(user_profile=user_profile).select_related('reward_item')
+    
+    return render(request, 'core/redemption_history.html', {
+        'redemptions': redemptions,
+        'user_profile': user_profile,
+    })
 
 @login_required
 def admin_dashboard_view(request):

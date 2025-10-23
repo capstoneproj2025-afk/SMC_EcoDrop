@@ -143,6 +143,12 @@ class RedeemedPoints(models.Model):
 
     def __str__(self):
         return f"{self.user_profile.user.username} redeemed {self.reward_item.reward_name}"
+    
+    @property
+    def valid_until(self):
+        """Return date 30 days after redemption"""
+        from datetime import timedelta
+        return self.created_at + timedelta(days=30)
 
 # Physical device management
 class Device(models.Model):
