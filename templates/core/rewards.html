@@ -19,15 +19,16 @@
 .rewards-header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; font-size: 1.3rem; font-weight: 700; }
 .points-pill { display: inline-block; background: #e8eaf6; color: #5c6bc0; padding: 10px 20px; border-radius: 20px; font-size: 0.95rem; }
 .points-pill .points-num { color: #3f51b5; font-weight: 700; }
-.rewards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 24px; }
+.rewards-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 24px; }
 .reward-card { background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: transform 0.2s; }
 .reward-card:hover { transform: translateY(-4px); box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
-.reward-header { background: #f9dfa2; padding: 40px 20px; text-align: center; position: relative; }
+.reward-header { background: #f9dfa2; padding: 0; text-align: left; position: relative; height: 200px; display: flex; align-items: center; justify-content: center; }
 .reward-header.green { background: #b8e6d5; }
 .reward-header.blue { background: #b3d9ff; }
 .reward-header.purple { background: #d4c5f9; }
-.reward-icon { font-size: 64px; color: rgba(0,0,0,0.15); margin-bottom: 12px; }
-.reward-name { font-size: 1.2rem; font-weight: 700; color: #2c3e50; }
+.reward-header img { width: 100%; height: 100%; object-fit: cover; }
+.reward-header .reward-icon { font-size: 80px; color: rgba(0,0,0,0.15); }
+.reward-name { position: absolute; bottom: 12px; left: 16px; font-size: 1.2rem; font-weight: 700; color: #2c3e50; background: rgba(255,255,255,0.9); padding: 8px 12px; border-radius: 6px; }
 .reward-body { padding: 20px; }
 .reward-desc { color: #5f6368; font-size: 0.9rem; margin-bottom: 16px; line-height: 1.5; }
 .reward-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
@@ -39,6 +40,14 @@
 .redeem-btn:disabled { background: #e0e0e0; color: #9e9e9e; cursor: not-allowed; }
 .tips { list-style: none; padding: 0; margin: 0; }
 .tips li { padding: 12px 0; border-bottom: 1px solid #f3f4f6; }
+
+/* Responsive: 2 columns on tablets, 1 column on mobile */
+@media (max-width: 992px) {
+    .rewards-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 576px) {
+    .rewards-grid { grid-template-columns: 1fr; }
+}
 </style>
 {% endblock %}
 
@@ -56,9 +65,13 @@
         {% for reward in rewards %}
         <div class="reward-card">
             <div class="reward-header {% cycle 'green' 'blue' 'purple' '' %}">
-                <div class="reward-icon">
-                    <i class="fas fa-recycle"></i>
-                </div>
+                {% if reward.image %}
+                    <img src="{{ reward.image.url }}" alt="{{ reward.reward_name }}">
+                {% else %}
+                    <div class="reward-icon">
+                        <i class="fas fa-gift"></i>
+                    </div>
+                {% endif %}
                 <div class="reward-name">{{ reward.reward_name }}</div>
             </div>
             <div class="reward-body">
