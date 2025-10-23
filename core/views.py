@@ -261,6 +261,7 @@ def redeem_reward_view(request, reward_id):
             'redemption_date': redemption.created_at.strftime('%B %d, %Y'),
             'redemption_time': redemption.created_at.strftime('%I:%M %p'),
             'valid_until': valid_until.strftime('%B %d, %Y'),
+            'receipt_number': redemption.receipt_number,
         }
     
     return redirect('rewards')

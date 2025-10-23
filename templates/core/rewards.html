@@ -101,6 +101,9 @@
 .receipt-reward { text-align: center; padding: 20px 0; }
 .receipt-reward-icon { font-size: 50px; color: rgba(0,0,0,0.2); margin-bottom: 10px; }
 .receipt-reward-name { font-size: 1.2rem; font-weight: 700; color: #2c3e50; }
+.receipt-number-box { background: #f0f7ff; padding: 15px; border-radius: 8px; text-align: center; margin: 15px 0; border: 2px dashed #4285f4; }
+.receipt-number-label { font-size: 0.75rem; color: #666; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; }
+.receipt-number-value { font-size: 1.3rem; font-weight: 700; color: #4285f4; font-family: 'Courier New', monospace; }
 .receipt-info { display: flex; justify-content: space-between; padding: 8px 0; font-size: 0.9rem; }
 .receipt-info .label { color: #666; }
 .receipt-info .value { font-weight: 600; color: #2c3e50; }
@@ -375,6 +378,13 @@
                 <div class="receipt-reward-icon"><i class="fas fa-recycle"></i></div>
                 <div class="receipt-reward-name">{{ last_redemption.reward_name }}</div>
             </div>
+            <div class="receipt-divider"></div>
+            
+            <div class="receipt-number-box">
+                <div class="receipt-number-label">Receipt Number</div>
+                <div class="receipt-number-value">{{ last_redemption.receipt_number }}</div>
+            </div>
+            
             <div class="receipt-divider"></div>
             
             <div class="receipt-info-box">

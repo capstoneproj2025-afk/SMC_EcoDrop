@@ -139,10 +139,31 @@ class RedeemedPoints(models.Model):
     user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     reward_item = models.ForeignKey(RewardItem, on_delete=models.CASCADE)
     redeemed_points = models.PositiveIntegerField()
+    receipt_number = models.CharField(max_length=30, unique=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.user_profile.user.username} redeemed {self.reward_item.reward_name}"
+    
+    def generate_receipt_number(self):
+        """Generate unique receipt number like SMCEcoDrop-2025-10232145"""
+        import random
+        from django.utils import timezone
+        
+        now = timezone.now()
+        year = now.strftime('%Y')
+        date_time = now.strftime('%m%d%H%M')  # MMDDHHMI format
+        
+        while True:
+            random_num = random.randint(10, 99)
+            receipt_num = f"SMCEcoDrop-{year}-{date_time}{random_num}"
+            if not RedeemedPoints.objects.filter(receipt_number=receipt_num).exists():
+                return receipt_num
+    
+    def save(self, *args, **kwargs):
+        if not self.receipt_number:
+            self.receipt_number = self.generate_receipt_number()
+        super().save(*args, **kwargs)
     
     @property
     def valid_until(self):
