@@ -55,6 +55,37 @@
 @media (max-width: 576px) {
     .rewards-grid { grid-template-columns: 1fr; }
 }
+
+/* Modal Styles */
+.modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center; }
+.modal-overlay.active { display: flex; }
+.modal-box { background: white; border-radius: 12px; max-width: 450px; width: 90%; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.3); animation: modalSlideIn 0.3s ease; }
+@keyframes modalSlideIn { from { transform: translateY(-50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+.modal-header { background: #f9dfa2; padding: 30px 20px; text-align: center; position: relative; }
+.modal-header.green { background: #b8e6d5; }
+.modal-header.blue { background: #b3d9ff; }
+.modal-header.purple { background: #d4c5f9; }
+.modal-close { position: absolute; top: 10px; right: 15px; background: none; border: none; font-size: 24px; cursor: pointer; color: #666; }
+.modal-close:hover { color: #000; }
+.modal-icon { font-size: 60px; color: rgba(0,0,0,0.2); margin-bottom: 10px; }
+.modal-title { font-size: 1.5rem; font-weight: 700; color: #2c3e50; margin: 10px 0 5px; }
+.modal-desc { font-size: 0.9rem; color: #666; }
+.modal-body { padding: 20px; }
+.points-breakdown { background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px; }
+.points-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e0e0e0; }
+.points-row:last-child { border-bottom: none; padding-top: 12px; font-weight: 600; }
+.points-row .label { color: #5f6368; }
+.points-row .value { font-weight: 600; color: #2c3e50; }
+.points-row .value.positive { color: #4285f4; }
+.points-row .value.negative { color: #e74c3c; }
+.ready-badge { background: #d4edda; color: #155724; padding: 12px; border-radius: 8px; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+.ready-badge i { font-size: 20px; }
+.modal-actions { display: flex; gap: 10px; }
+.modal-btn { flex: 1; padding: 12px; border: none; border-radius: 6px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+.modal-btn.cancel { background: white; border: 1px solid #ddd; color: #666; }
+.modal-btn.cancel:hover { background: #f5f5f5; }
+.modal-btn.confirm { background: #4285f4; color: white; }
+.modal-btn.confirm:hover { background: #3367d6; }
 </style>
 {% endblock %}
 
@@ -103,7 +134,11 @@
                     {% endif %}
                 </div>
                 {% if user_profile.total_points >= reward.points_required %}
-                    <a href="{% url 'redeem_reward' reward.id %}" class="redeem-btn">Redeem Now</a>
+                    {% with forloop.counter0|divisibleby:"4" as is_beige %}
+                    {% with forloop.counter0|divisibleby:"3" as is_purple %}
+                    <button class="redeem-btn" onclick="openRedeemModal('{{ reward.id }}', '{{ reward.reward_name|escapejs }}', {{ reward.points_required }}, '{% if is_beige %}beige{% elif forloop.counter0|divisibleby:"2" %}blue{% elif is_purple %}purple{% else %}green{% endif %}')">Redeem Now</button>
+                    {% endwith %}
+                    {% endwith %}
                 {% else %}
                     {% widthratio user_profile.total_points -1 1 as neg_points %}
                     <button class="redeem-btn" disabled>Need {{ reward.points_required|add:neg_points }} more points</button>
@@ -150,4 +185,82 @@
                     <li><i class="fas fa-seedling"></i> Help save the environment while earning rewards!</li>
                 </ul>
             </section>
+
+<!-- Redemption Modal -->
+<div class="modal-overlay" id="redeemModal" onclick="if(event.target === this) closeRedeemModal()">
+    <div class="modal-box">
+        <div class="modal-header" id="modalHeaderColor">
+            <button class="modal-close" onclick="closeRedeemModal()">&times;</button>
+            <div class="modal-icon">
+                <i class="fas fa-recycle"></i>
+            </div>
+            <div class="modal-title" id="modalRewardName">Coffee Voucher</div>
+            <div class="modal-desc">Get a free coffee at any participating location</div>
+        </div>
+        <div class="modal-body">
+            <div class="points-breakdown">
+                <div class="points-row">
+                    <span class="label">Your Current Points</span>
+                    <span class="value">{{ user_profile.total_points }} pts</span>
+                </div>
+                <div class="points-row">
+                    <span class="label">Required Points</span>
+                    <span class="value negative" id="modalRequiredPoints">-50 pts</span>
+                </div>
+                <div class="points-row">
+                    <span class="label">Points After Redemption</span>
+                    <span class="value positive" id="modalAfterPoints">75 pts</span>
+                </div>
+            </div>
+            <div class="ready-badge">
+                <i class="fas fa-check-circle"></i>
+                <div>
+                    <strong>Ready to Redeem!</strong><br>
+                    <small>Your reward will be available immediately after confirmation. Check your email for details.</small>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn cancel" onclick="closeRedeemModal()">Cancel</button>
+                <form method="post" id="redeemForm" style="flex: 1; margin: 0;">
+                    {% csrf_token %}
+                    <button type="submit" class="modal-btn confirm">Confirm Redemption</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const userPoints = {{ user_profile.total_points }};
+
+function openRedeemModal(rewardId, rewardName, requiredPoints, colorClass) {
+    const afterPoints = userPoints - requiredPoints;
+    
+    // Update modal content
+    document.getElementById('modalRewardName').textContent = rewardName;
+    document.getElementById('modalRequiredPoints').textContent = '-' + requiredPoints + ' pts';
+    document.getElementById('modalAfterPoints').textContent = afterPoints + ' pts';
+    
+    // Update header color
+    const modalHeader = document.getElementById('modalHeaderColor');
+    modalHeader.className = 'modal-header ' + colorClass;
+    
+    // Update form action
+    document.getElementById('redeemForm').action = '/rewards/redeem/' + rewardId + '/';
+    
+    // Show modal
+    document.getElementById('redeemModal').classList.add('active');
+}
+
+function closeRedeemModal() {
+    document.getElementById('redeemModal').classList.remove('active');
+}
+
+// Close modal on Escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeRedeemModal();
+    }
+});
+</script>
 {% endblock %}
