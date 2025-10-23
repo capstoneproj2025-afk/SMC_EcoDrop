@@ -14,49 +14,93 @@
 
 {% block extra_styles %}
 <style>
-  .stats-grid { 
-    display: grid !important; 
-    grid-template-columns: repeat(2, 1fr) !important; 
-    gap: 16px !important; 
-  }
-  .stat-card { 
-    background: linear-gradient(135deg, #27ae60 0%, #229954 100%) !important; 
-    color: white !important; 
-    padding: 24px !important; 
-    border-radius: 12px !important; 
-    text-align: center !important; 
-    box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3) !important; 
-  }
-  .stat-number { 
-    font-size: 2.5rem !important; 
-    font-weight: bold !important; 
-    display: block !important; 
-    margin-bottom: 8px !important; 
-  }
-  .stat-label { 
-    font-size: 0.95rem !important; 
-    opacity: 0.9 !important; 
-  }
+.recycling { margin-top: 0; }
+.cards { display:flex; gap:16px; flex-wrap:wrap; }
+.kpi { flex:1; min-width: 220px; color:#fff; border-radius: 10px; padding: 16px; box-shadow: 0 6px 18px rgba(0,0,0,0.12); }
+.kpi.green { background:#27ae60; }
+.kpi.blue { background:#229954; }
+.kpi-value { font-size: 28px; font-weight: 800; }
+.kpi-label { opacity: 0.9; }
+.table-card { margin-top: 16px; }
+.table-wrap { overflow-x:auto; }
+.table-wrap table { width:100%; border-collapse: collapse; }
+.table-wrap th, .table-wrap td { text-align:left; padding:12px; border-bottom:1px solid #e5e7eb; }
+.table-wrap thead th { background:#f9fafb; }
+.pts { color:#27ae60; font-weight: 700; }
+.card { background:#fff; border-radius: 8px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+.empty { text-align:center; color:#666; padding: 20px; }
 </style>
 {% endblock %}
 
 {% block content %}
-<section class="like-panel">
-  <h1 style="margin: 0 0 6px;">Teacher Dashboard</h1>
-  <p style="margin: 0; color: #6b7280;">Welcome, {{ user.first_name }} {{ user.last_name }}</p>
-</section>
+<!-- Recycling Dashboard -->
+<section id="recycling" class="recycling">
+    <h2>Recycling Dashboard</h2>
+    <div class="cards">
+        <div class="kpi green">
+            <div class="kpi-value">{{ teacher_bottles }}</div>
+            <div class="kpi-label">Bottles Recycled</div>
+        </div>
+        <div class="kpi blue">
+            <div class="kpi-value">{{ user_profile.total_points }}</div>
+            <div class="kpi-label">Total Points</div>
+        </div>
+    </div>
 
-<section class="like-panel">
-  <h2 style="margin: 0 0 16px;">Recycling Statistics</h2>
-  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-    <div style="background: linear-gradient(135deg, #27ae60 0%, #229954 100%); color: white; padding: 24px; border-radius: 12px; text-align: center; box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);">
-      <span style="font-size: 2.5rem; font-weight: bold; display: block; margin-bottom: 8px;">{{ teacher_bottles }}</span>
-      <div style="font-size: 0.95rem; opacity: 0.9;">Bottles Recycled</div>
+    <div class="card table-card">
+        <h3>Recent Transactions</h3>
+        {% if recent_entries %}
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Bottles</th>
+                        <th>Points Earned</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entry in recent_entries %}
+                    <tr>
+                        <td>{{ entry.created_at|date:"M d, Y H:i" }}</td>
+                        <td><i class="fas fa-bottle-water"></i> {{ entry.no_bottle }}</td>
+                        <td><span class="pts">+{{ entry.points }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+            <p class="empty"><i class="fas fa-bottle-water"></i> No transactions yet. Start recycling bottles to earn points!</p>
+        {% endif %}
     </div>
-    <div style="background: linear-gradient(135deg, #27ae60 0%, #229954 100%); color: white; padding: 24px; border-radius: 12px; text-align: center; box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);">
-      <span style="font-size: 2.5rem; font-weight: bold; display: block; margin-bottom: 8px;">{{ teacher_points }}</span>
-      <div style="font-size: 0.95rem; opacity: 0.9;">Points Earned</div>
+
+    <div class="card table-card">
+        <h3>Redemption History</h3>
+        {% if redemptions %}
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Reward</th>
+                        <th>Points Used</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for redemption in redemptions %}
+                    <tr>
+                        <td>{{ redemption.created_at|date:"M d, Y H:i" }}</td>
+                        <td><i class="fas fa-gift"></i> {{ redemption.reward_item.reward_name }}</td>
+                        <td><span style="color: #e74c3c; font-weight: 700;">-{{ redemption.redeemed_points }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+            <p class="empty"><i class="fas fa-gift"></i> No redemptions yet. Check out the Rewards page!</p>
+        {% endif %}
     </div>
-  </div>
 </section>
 {% endblock %}

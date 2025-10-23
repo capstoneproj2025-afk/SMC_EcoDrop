@@ -133,6 +133,10 @@ def teacher_dashboard_view(request):
     # Recent transactions
     recent_transactions = Entry.objects.select_related('user_profile__user').order_by('-created_at')[:20]
     
+    # Teacher's own recent entries and redemptions
+    recent_entries = Entry.objects.filter(user_profile=user_profile).order_by('-created_at')[:10]
+    redemptions = RedeemedPoints.objects.filter(user_profile=user_profile).select_related('reward_item').order_by('-created_at')[:10]
+    
     return render(request, 'core/teacher_dashboard.html', {
         'user_profile': user_profile,
         'teacher_bottles': teacher_bottles,
@@ -143,6 +147,8 @@ def teacher_dashboard_view(request):
         'recent_deposits': recent_deposits,
         'top_students': top_students,
         'recent_transactions': recent_transactions,
+        'recent_entries': recent_entries,
+        'redemptions': redemptions,
     })
 
 @login_required
