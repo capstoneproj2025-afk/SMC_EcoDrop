@@ -27,8 +27,8 @@
 .kpi-label { opacity: 0.95; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
 .table-card { margin-top: 0; }
 .table-card h3 { margin-bottom: 16px; color: #1f2937; font-size: 1.25rem; }
-.table-wrap { overflow-x:auto; border-radius: 8px; border: 1px solid #e5e7eb; }
-.table-wrap table { width:100%; border-collapse: collapse; min-width: 500px; display: table !important; }
+.table-wrap { overflow-x:auto; border-radius: 8px; border: 1px solid #e5e7eb; margin: 0; }
+.table-wrap table { width:100%; border-collapse: collapse; display: table !important; table-layout: auto; }
 .table-wrap th { 
     text-align:left; 
     padding:14px 16px; 
@@ -40,6 +40,9 @@
     letter-spacing: 0.5px;
     border-bottom: 2px solid #e5e7eb;
 }
+.table-wrap th:nth-child(1) { width: 40%; }
+.table-wrap th:nth-child(2) { width: 30%; }
+.table-wrap th:nth-child(3) { width: 30%; }
 .table-wrap td { 
     text-align:left; 
     padding:14px 16px; 
@@ -65,7 +68,7 @@
     .cards { flex-direction: column; }
     .kpi { min-width: 100%; }
     .table-wrap { border: none; }
-    .table-wrap table { min-width: 100%; }
+    .table-wrap table { width: 100%; }
     .table-wrap th, .table-wrap td { padding: 10px 12px; font-size: 0.85rem; }
 }
 </style>
