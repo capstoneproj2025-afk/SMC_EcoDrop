@@ -2,7 +2,7 @@
 {% block title %}Device Activity Logs - Admin Console{% endblock %}
 {% block content %}
 <div class="card">
-  <h1>📋 Device Activity Logs</h1>
+  <h1><i class="fas fa-clipboard-list"></i> Device Activity Logs</h1>
   <p style="color:#666; margin: 10px 0 20px;">Monitor device activity and errors (showing last 200 logs)</p>
   
   <div style="overflow-x:auto;">
@@ -23,24 +23,24 @@
           <td style="padding:10px;border-bottom:1px solid #e5e7eb;">{{ log.device.device_name }}</td>
           <td style="padding:10px;border-bottom:1px solid #e5e7eb;">
             {% if log.log_type == 'bottle_detected' %}
-              🔍 Detection
+              <i class="fas fa-search"></i> Detection
             {% elif log.log_type == 'bottle_sorted' %}
-              ✅ Sorted
+              <i class="fas fa-check-circle"></i> Sorted
             {% elif log.log_type == 'error' %}
-              ❌ Error
+              <i class="fas fa-times-circle"></i> Error
             {% elif log.log_type == 'heartbeat' %}
-              💓 Heartbeat
+              <i class="fas fa-heartbeat"></i> Heartbeat
             {% else %}
-              🔧 {{ log.log_type|title }}
+              <i class="fas fa-wrench"></i> {{ log.log_type|title }}
             {% endif %}
           </td>
           <td style="padding:10px;border-bottom:1px solid #e5e7eb;">
             {% if log.sort_result == 'plastic' %}
-              <span style="color: #28a745;">✓ Valid</span>
+              <span style="color: #28a745;"><i class="fas fa-check"></i> Valid</span>
             {% elif log.sort_result == 'invalid' %}
-              <span style="color: #dc3545;">✗ Invalid</span>
+              <span style="color: #dc3545;"><i class="fas fa-times"></i> Invalid</span>
             {% elif log.sort_result == 'error' %}
-              <span style="color: #ffc107;">⚠ Error</span>
+              <span style="color: #ffc107;"><i class="fas fa-exclamation-triangle"></i> Error</span>
             {% else %}
               -
             {% endif %}

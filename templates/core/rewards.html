@@ -36,7 +36,7 @@
 
 {% block content %}
             <section class="like-panel">
-                <h1 style="margin: 0 0 6px;">🎁 Available Rewards</h1>
+                <h1 style="margin: 0 0 6px;"><i class="fas fa-gift"></i> Available Rewards</h1>
                 <p style="margin: 0 0 16px;">You have <span class="points-badge">{{ user_points }} points</span></p>
                 {% if rewards %}
                 <div class="rewards-grid">
@@ -55,16 +55,16 @@
                     {% endfor %}
                 </div>
                 {% else %}
-                    <p class="empty">🎁 No rewards available at the moment. Check back later!</p>
+                    <p class="empty"><i class="fas fa-gift"></i> No rewards available at the moment. Check back later!</p>
                 {% endif %}
             </section>
 
             <section class="like-panel">
-                <h2>💡 How to Earn More Points</h2>
+                <h2><i class="fas fa-lightbulb"></i> How to Earn More Points</h2>
                 <ul class="tips">
-                    <li>🍶 Deposit 1 bottle = 10 points</li>
-                    <li>♻️ Use your QR code at any EcoDrop machine</li>
-                    <li>🌱 Help save the environment while earning rewards!</li>
+                    <li><i class="fas fa-bottle-water"></i> Deposit 1 bottle = 10 points</li>
+                    <li><i class="fas fa-recycle"></i> Use your QR code at any EcoDrop machine</li>
+                    <li><i class="fas fa-seedling"></i> Help save the environment while earning rewards!</li>
                 </ul>
             </section>
 {% endblock %}

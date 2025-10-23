@@ -148,18 +148,18 @@
 <section class="like-panel">
     <h2 style="margin: 0 0 16px;">Quick Actions</h2>
     <div class="quick-actions">
-        <a href="{% url 'admin_user_add' %}" class="action-btn">👤 Add New User</a>
-        <a href="{% url 'admin_users' %}" class="action-btn">🧑‍💼 Manage Users</a>
-        <a href="{% url 'admin_rewards' %}" class="action-btn">🎁 Manage Rewards</a>
-        <a href="{% url 'admin_redemptions' %}" class="action-btn">💰 Redemption History</a>
-        <a href="{% url 'admin_devices' %}" class="action-btn">🤖 Manage Devices</a>
-        <a href="{% url 'admin_full_panel' %}" class="action-btn">⚙️ Full Admin Panel</a>
+        <a href="{% url 'admin_user_add' %}" class="action-btn"><i class="fas fa-user-plus"></i> Add New User</a>
+        <a href="{% url 'admin_users' %}" class="action-btn"><i class="fas fa-users-cog"></i> Manage Users</a>
+        <a href="{% url 'admin_rewards' %}" class="action-btn"><i class="fas fa-gift"></i> Manage Rewards</a>
+        <a href="{% url 'admin_redemptions' %}" class="action-btn"><i class="fas fa-coins"></i> Redemption History</a>
+        <a href="{% url 'admin_devices' %}" class="action-btn"><i class="fas fa-microchip"></i> Manage Devices</a>
+        <a href="{% url 'admin_full_panel' %}" class="action-btn"><i class="fas fa-cog"></i> Full Admin Panel</a>
     </div>
 </section>
 
 <!-- Device Status Overview -->
 <section class="like-panel">
-    <h2>🤖 Device Status Overview</h2>
+    <h2><i class="fas fa-microchip"></i> Device Status Overview</h2>
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
         <div style="text-align: center; padding: 20px; background: #d4edda; border-radius: 8px; border-left: 4px solid #28a745;">
             <h3 style="color: #28a745; margin-bottom: 10px;">{{ online_devices }}</h3>
@@ -182,7 +182,7 @@
 
 <!-- Device Performance -->
 <section class="like-panel">
-    <h2>📊 Top Performing Devices</h2>
+    <h2><i class="fas fa-chart-line"></i> Top Performing Devices</h2>
     {% if device_performance %}
         <div class="table-responsive">
             <table class="admin-table">
@@ -233,7 +233,7 @@
 
 <!-- Recent Device Activity -->
 <section class="like-panel">
-    <h2>🔧 Recent Device Activity</h2>
+    <h2><i class="fas fa-wrench"></i> Recent Device Activity</h2>
     {% if recent_device_logs %}
         <div class="table-responsive">
             <table class="admin-table">
@@ -253,24 +253,24 @@
                         <td>{{ log.device.device_name }}</td>
                         <td>
                             {% if log.log_type == 'bottle_detected' %}
-                                🔍 Detection
+                                <i class="fas fa-search"></i> Detection
                             {% elif log.log_type == 'bottle_sorted' %}
-                                ✅ Sorted
+                                <i class="fas fa-check-circle"></i> Sorted
                             {% elif log.log_type == 'error' %}
-                                ❌ Error
+                                <i class="fas fa-times-circle"></i> Error
                             {% elif log.log_type == 'heartbeat' %}
-                                💓 Heartbeat
+                                <i class="fas fa-heartbeat"></i> Heartbeat
                             {% else %}
-                                🔧 {{ log.log_type|title }}
+                                <i class="fas fa-wrench"></i> {{ log.log_type|title }}
                             {% endif %}
                         </td>
                         <td>
                             {% if log.sort_result == 'plastic' %}
-                                <span style="color: #28a745;">✓ Valid Plastic</span>
+                                <span style="color: #28a745;"><i class="fas fa-check"></i> Valid Plastic</span>
                             {% elif log.sort_result == 'invalid' %}
-                                <span style="color: #dc3545;">✗ Invalid</span>
+                                <span style="color: #dc3545;"><i class="fas fa-times"></i> Invalid</span>
                             {% elif log.sort_result == 'error' %}
-                                <span style="color: #ffc107;">⚠ Error</span>
+                                <span style="color: #ffc107;"><i class="fas fa-exclamation-triangle"></i> Error</span>
                             {% else %}
                                 -
                             {% endif %}
@@ -288,7 +288,7 @@
 
 <!-- Top Recyclers -->
 <section class="like-panel">
-    <h2>🏆 Top Recyclers</h2>
+    <h2><i class="fas fa-trophy"></i> Top Recyclers</h2>
     {% if top_recyclers %}
         <div class="table-responsive">
             <table class="admin-table">
@@ -329,7 +329,7 @@
 
 <!-- Recent Transactions -->
 <section class="like-panel">
-    <h2>📈 Recent Transactions</h2>
+    <h2><i class="fas fa-chart-bar"></i> Recent Transactions</h2>
     {% if recent_transactions %}
         <div class="table-responsive">
             <table class="admin-table">
@@ -347,7 +347,7 @@
                     <tr>
                         <td>{{ transaction.created_at|date:"M d, Y H:i" }}</td>
                         <td>{{ transaction.user_profile.user.first_name }} {{ transaction.user_profile.user.last_name }}</td>
-                        <td>🍶 {{ transaction.no_bottle }}</td>
+                        <td><i class="fas fa-bottle-water"></i> {{ transaction.no_bottle }}</td>
                         <td><span style="color: #2ecc71; font-weight: bold;">+{{ transaction.points }}</span></td>
                         <td><code style="font-size: 0.8rem;">{{ transaction.user_profile.qr_code_data|truncatechars:20 }}</code></td>
                     </tr>
@@ -362,7 +362,7 @@
 
 <!-- Reward Statistics -->
 <section class="like-panel">
-    <h2>🎁 Popular Rewards</h2>
+    <h2><i class="fas fa-gift"></i> Popular Rewards</h2>
     {% if reward_stats %}
         <div class="table-responsive">
             <table class="admin-table">
@@ -389,8 +389,9 @@
     {% endif %}
 </section>
 
-<section class="like-panel">
-    <h2>🔧 IoT Integration</h2>
+<!-- IoT Integration section hidden - API still works -->
+<!-- <section class="like-panel">
+    <h2><i class="fas fa-wrench"></i> IoT Integration</h2>
     <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
         <h4>API Endpoint for EcoDrop Machines:</h4>
         <code style="background: #e9ecef; padding: 15px; border-radius: 6px; display: block; margin: 10px 0;">
@@ -406,10 +407,10 @@
             <strong>Note:</strong> This endpoint accepts barcode data from your IoT recycling machines and automatically processes bottle deposits.
         </p>
     </div>
-</section>
+</section> -->
 
 <section class="like-panel">
-    <h2>📊 Weekly Activity Summary</h2>
+    <h2><i class="fas fa-chart-pie"></i> Weekly Activity Summary</h2>
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
         <div style="text-align: center; padding: 20px; background: #e8f5e8; border-radius: 8px;">
             <h3 style="color: #27ae60; margin-bottom: 10px;">{{ recent_deposits }}</h3>

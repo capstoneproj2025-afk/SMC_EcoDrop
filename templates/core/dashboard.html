@@ -144,7 +144,7 @@
                     {% for entry in recent_entries %}
                     <tr>
                         <td>{{ entry.created_at|date:"M d, Y H:i" }}</td>
-                        <td>🍶 {{ entry.no_bottle }}</td>
+                        <td><i class="fas fa-bottle-water"></i> {{ entry.no_bottle }}</td>
                         <td><span class="pts">+{{ entry.points }}</span></td>
                     </tr>
                     {% endfor %}
@@ -152,7 +152,7 @@
             </table>
         </div>
         {% else %}
-            <p class="empty">🍶 No transactions yet. Start recycling bottles to earn points!</p>
+            <p class="empty"><i class="fas fa-bottle-water"></i> No transactions yet. Start recycling bottles to earn points!</p>
         {% endif %}
     </div>
 </section>
