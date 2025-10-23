@@ -63,14 +63,25 @@
     .rewards-grid { grid-template-columns: 1fr; gap: 12px; }
     .reward-header { height: 160px; }
     .reward-body { padding: 12px; }
-    .modal-box { width: 95%; max-width: 100%; }
-    .receipt-modal { width: 95%; max-width: 100%; }
+    .modal-box { width: 95%; max-width: 100%; margin: 10px; }
+    .receipt-modal { width: 95%; max-width: 100%; margin: 10px; }
     .modal-header { padding: 20px 15px; }
     .receipt-header { padding: 20px 15px; }
     .modal-body { padding: 15px; }
     .receipt-body { padding: 15px; }
     .modal-actions { flex-direction: column; }
     .modal-btn { width: 100%; }
+    .reward-name { font-size: 1rem; }
+    .points-pill { font-size: 0.85rem; padding: 8px 16px; }
+}
+
+@media (max-width: 360px) {
+    .rewards-header { font-size: 1rem; }
+    .reward-body { padding: 10px; }
+    .reward-name { font-size: 0.95rem; }
+    .reward-points { font-size: 0.9rem; }
+    .redeem-btn { padding: 10px; font-size: 0.9rem; }
+    .receipt-number-value { font-size: 0.9rem; }
 }
 
 /* Modal Styles */
