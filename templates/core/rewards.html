@@ -346,35 +346,42 @@
     });
     
     {% if last_redemption %}
-    // Auto-show success modal after redemption
+    // Auto-show success modal after redemption and set up event listeners
     window.addEventListener('DOMContentLoaded', function() {
-        document.getElementById('successModal').classList.add('active');
+        var successModal = document.getElementById('successModal');
+        if (successModal) {
+            successModal.classList.add('active');
+            
+            // Success modal close handlers
+            function closeSuccessModal() {
+                successModal.classList.remove('active');
+            }
+            
+            var successCloseBtn = document.getElementById('successCloseBtn');
+            if (successCloseBtn) {
+                successCloseBtn.addEventListener('click', closeSuccessModal);
+            }
+            
+            var successDoneBtn = document.getElementById('successDoneBtn');
+            if (successDoneBtn) {
+                successDoneBtn.addEventListener('click', closeSuccessModal);
+            }
+            
+            successModal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeSuccessModal();
+                }
+            });
+            
+            // Close on Escape
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeSuccessModal();
+                }
+            });
+        }
     });
     {% endif %}
-    
-    // Success modal close handlers
-    function closeSuccessModal() {
-        document.getElementById('successModal').classList.remove('active');
-    }
-    
-    var successCloseBtn = document.getElementById('successCloseBtn');
-    if (successCloseBtn) {
-        successCloseBtn.addEventListener('click', closeSuccessModal);
-    }
-    
-    var successDoneBtn = document.getElementById('successDoneBtn');
-    if (successDoneBtn) {
-        successDoneBtn.addEventListener('click', closeSuccessModal);
-    }
-    
-    var successModal = document.getElementById('successModal');
-    if (successModal) {
-        successModal.addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeSuccessModal();
-            }
-        });
-    }
 })();
 </script>
 
