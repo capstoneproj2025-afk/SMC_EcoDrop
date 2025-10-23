@@ -134,11 +134,13 @@
                     {% endif %}
                 </div>
                 {% if user_profile.total_points >= reward.points_required %}
-                    {% with forloop.counter0|divisibleby:"4" as is_beige %}
-                    {% with forloop.counter0|divisibleby:"3" as is_purple %}
-                    <button class="redeem-btn" onclick="openRedeemModal('{{ reward.id }}', '{{ reward.reward_name|escapejs }}', {{ reward.points_required }}, '{% if is_beige %}beige{% elif forloop.counter0|divisibleby:"2" %}blue{% elif is_purple %}purple{% else %}green{% endif %}')">Redeem Now</button>
-                    {% endwith %}
-                    {% endwith %}
+                    <button class="redeem-btn" 
+                            data-reward-id="{{ reward.id }}" 
+                            data-reward-name="{{ reward.reward_name }}" 
+                            data-reward-points="{{ reward.points_required }}"
+                            data-reward-color="{% cycle 'beige' 'green' 'blue' 'purple' %}">
+                        Redeem Now
+                    </button>
                 {% else %}
                     {% widthratio user_profile.total_points -1 1 as neg_points %}
                     <button class="redeem-btn" disabled>Need {{ reward.points_required|add:neg_points }} more points</button>
@@ -187,10 +189,10 @@
             </section>
 
 <!-- Redemption Modal -->
-<div class="modal-overlay" id="redeemModal" onclick="if(event.target === this) closeRedeemModal()">
+<div class="modal-overlay" id="redeemModal">
     <div class="modal-box">
         <div class="modal-header" id="modalHeaderColor">
-            <button class="modal-close" onclick="closeRedeemModal()">&times;</button>
+            <button class="modal-close" id="modalCloseBtn">&times;</button>
             <div class="modal-icon">
                 <i class="fas fa-recycle"></i>
             </div>
@@ -220,7 +222,7 @@
                 </div>
             </div>
             <div class="modal-actions">
-                <button class="modal-btn cancel" onclick="closeRedeemModal()">Cancel</button>
+                <button class="modal-btn cancel" id="modalCancelBtn">Cancel</button>
                 <form method="post" id="redeemForm" style="flex: 1; margin: 0;">
                     {% csrf_token %}
                     <button type="submit" class="modal-btn confirm">Confirm Redemption</button>
@@ -231,36 +233,64 @@
 </div>
 
 <script>
-const userPoints = {{ user_profile.total_points }};
-
-function openRedeemModal(rewardId, rewardName, requiredPoints, colorClass) {
-    const afterPoints = userPoints - requiredPoints;
+(function() {
+    // User points from server
+    var userPoints = parseInt('{{ user_profile.total_points }}');
     
-    // Update modal content
-    document.getElementById('modalRewardName').textContent = rewardName;
-    document.getElementById('modalRequiredPoints').textContent = '-' + requiredPoints + ' pts';
-    document.getElementById('modalAfterPoints').textContent = afterPoints + ' pts';
+    // Event delegation for redeem buttons
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('redeem-btn') && !e.target.disabled) {
+            var rewardId = e.target.getAttribute('data-reward-id');
+            var rewardName = e.target.getAttribute('data-reward-name');
+            var requiredPoints = parseInt(e.target.getAttribute('data-reward-points'));
+            var colorClass = e.target.getAttribute('data-reward-color');
+            
+            if (rewardId && rewardName && requiredPoints) {
+                openRedeemModal(rewardId, rewardName, requiredPoints, colorClass);
+            }
+        }
+    });
     
-    // Update header color
-    const modalHeader = document.getElementById('modalHeaderColor');
-    modalHeader.className = 'modal-header ' + colorClass;
-    
-    // Update form action
-    document.getElementById('redeemForm').action = '/rewards/redeem/' + rewardId + '/';
-    
-    // Show modal
-    document.getElementById('redeemModal').classList.add('active');
-}
-
-function closeRedeemModal() {
-    document.getElementById('redeemModal').classList.remove('active');
-}
-
-// Close modal on Escape key
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-        closeRedeemModal();
+    function openRedeemModal(rewardId, rewardName, requiredPoints, colorClass) {
+        var afterPoints = userPoints - requiredPoints;
+        
+        // Update modal content
+        document.getElementById('modalRewardName').textContent = rewardName;
+        document.getElementById('modalRequiredPoints').textContent = '-' + requiredPoints + ' pts';
+        document.getElementById('modalAfterPoints').textContent = afterPoints + ' pts';
+        
+        // Update header color
+        var modalHeader = document.getElementById('modalHeaderColor');
+        modalHeader.className = 'modal-header ' + colorClass;
+        
+        // Update form action
+        document.getElementById('redeemForm').action = '/rewards/redeem/' + rewardId + '/';
+        
+        // Show modal
+        document.getElementById('redeemModal').classList.add('active');
     }
-});
+    
+    function closeRedeemModal() {
+        document.getElementById('redeemModal').classList.remove('active');
+    }
+    
+    // Close button click
+    document.getElementById('modalCloseBtn').addEventListener('click', closeRedeemModal);
+    document.getElementById('modalCancelBtn').addEventListener('click', closeRedeemModal);
+    
+    // Click overlay to close
+    document.getElementById('redeemModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeRedeemModal();
+        }
+    });
+    
+    // Close modal on Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeRedeemModal();
+        }
+    });
+})();
 </script>
 {% endblock %}
