@@ -72,6 +72,10 @@ def login_view(request):
                     else:
                         return redirect('teacher_dashboard')
                 return redirect('dashboard')
+            else:
+                messages.error(request, 'Invalid ID Number or password. Please try again.')
+        else:
+            messages.error(request, 'Please fill in all required fields correctly.')
     else:
         form = LoginForm()
     return render(request, 'core/login.html', {'form': form})
