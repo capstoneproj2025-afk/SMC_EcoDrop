@@ -133,9 +133,13 @@ def teacher_dashboard_view(request):
     # Recent transactions
     recent_transactions = Entry.objects.select_related('user_profile__user').order_by('-created_at')[:20]
     
-    # Teacher's own recent entries and redemptions
+    # Teacher's own recent entries and redemptions (only valid ones - within 3 days)
     recent_entries = Entry.objects.filter(user_profile=user_profile).order_by('-created_at')[:10]
-    redemptions = RedeemedPoints.objects.filter(user_profile=user_profile).select_related('reward_item').order_by('-created_at')[:10]
+    three_days_ago = timezone.now() - timedelta(days=3)
+    redemptions = RedeemedPoints.objects.filter(
+        user_profile=user_profile,
+        created_at__gte=three_days_ago
+    ).select_related('reward_item').order_by('-created_at')[:10]
     
     return render(request, 'core/teacher_dashboard.html', {
         'user_profile': user_profile,
@@ -173,10 +177,19 @@ def student_profile_view(request):
     if request.user.is_staff:
         return redirect('teacher_dashboard')
     
+    from django.utils import timezone
+    from datetime import timedelta
+    
     user_profile = request.user.profile
     total_bottles = Entry.objects.filter(user_profile=user_profile).aggregate(total=models.Sum('no_bottle'))['total'] or 0
     recent_entries = Entry.objects.filter(user_profile=user_profile).order_by('-created_at')[:10]
-    redemptions = RedeemedPoints.objects.filter(user_profile=user_profile).order_by('-created_at')[:5]
+    
+    # Only show valid redemptions (within 3 days)
+    three_days_ago = timezone.now() - timedelta(days=3)
+    redemptions = RedeemedPoints.objects.filter(
+        user_profile=user_profile,
+        created_at__gte=three_days_ago
+    ).order_by('-created_at')[:5]
     
     return render(request, 'core/student_profile.html', {
         'user_profile': user_profile,
@@ -237,9 +250,9 @@ def redeem_reward_view(request, reward_id):
             redeemed_points=reward.points_required
         )
         
-        # Calculate valid until date (30 days from now)
+        # Calculate valid until date (3 days from now)
         from datetime import timedelta
-        valid_until = redemption.created_at + timedelta(days=30)
+        valid_until = redemption.created_at + timedelta(days=3)
         
         # Store redemption info in session for success modal
         request.session['last_redemption'] = {
@@ -254,9 +267,18 @@ def redeem_reward_view(request, reward_id):
 
 @login_required
 def redemption_history_view(request):
-    """Display user's redemption history"""
+    """Display user's redemption history (only valid/non-expired redemptions)"""
+    from django.utils import timezone
+    from datetime import timedelta
+    
     user_profile = request.user.profile
-    redemptions = RedeemedPoints.objects.filter(user_profile=user_profile).select_related('reward_item')
+    
+    # Only show redemptions from the last 3 days (valid redemptions)
+    three_days_ago = timezone.now() - timedelta(days=3)
+    redemptions = RedeemedPoints.objects.filter(
+        user_profile=user_profile,
+        created_at__gte=three_days_ago
+    ).select_related('reward_item').order_by('-created_at')
     
     return render(request, 'core/redemption_history.html', {
         'redemptions': redemptions,

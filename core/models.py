@@ -146,9 +146,15 @@ class RedeemedPoints(models.Model):
     
     @property
     def valid_until(self):
-        """Return date 30 days after redemption"""
+        """Return date 3 days after redemption"""
         from datetime import timedelta
-        return self.created_at + timedelta(days=30)
+        return self.created_at + timedelta(days=3)
+    
+    @property
+    def is_expired(self):
+        """Check if redemption has expired (more than 3 days)"""
+        from django.utils import timezone
+        return timezone.now() > self.valid_until
 
 # Physical device management
 class Device(models.Model):
