@@ -270,8 +270,7 @@
             <div class="ready-badge">
                 <i class="fas fa-check-circle"></i>
                 <div>
-                    <strong>Ready to Redeem!</strong><br>
-                    <small>Your reward will be available immediately after confirmation. Check your email for details.</small>
+                    <strong>Ready to Redeem!</strong>
                 </div>
             </div>
             <div class="modal-actions">
@@ -398,7 +397,11 @@
         <div class="receipt-body">
             <div class="receipt-divider"></div>
             <div class="receipt-reward">
+                {% if last_redemption.reward_image %}
+                <img src="{{ last_redemption.reward_image }}" alt="{{ last_redemption.reward_name }}" style="width: 100px; height: 100px; object-fit: contain; margin-bottom: 10px;">
+                {% else %}
                 <div class="receipt-reward-icon"><i class="fas fa-recycle"></i></div>
+                {% endif %}
                 <div class="receipt-reward-name">{{ last_redemption.reward_name }}</div>
             </div>
             <div class="receipt-divider"></div>

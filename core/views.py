@@ -257,6 +257,7 @@ def redeem_reward_view(request, reward_id):
         # Store redemption info in session for success modal
         request.session['last_redemption'] = {
             'reward_name': reward.reward_name,
+            'reward_image': reward.image.url if reward.image else None,
             'points_deducted': reward.points_required,
             'redemption_date': redemption.created_at.strftime('%B %d, %Y'),
             'redemption_time': redemption.created_at.strftime('%I:%M %p'),
