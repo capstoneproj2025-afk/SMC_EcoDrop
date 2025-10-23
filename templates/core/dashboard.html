@@ -76,5 +76,33 @@
             <p class="empty"><i class="fas fa-bottle-water"></i> No transactions yet. Start recycling bottles to earn points!</p>
         {% endif %}
     </div>
+
+    <div class="card table-card">
+        <h3>Redemption History</h3>
+        {% if redemptions %}
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Reward</th>
+                        <th>Points Used</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for redemption in redemptions %}
+                    <tr>
+                        <td>{{ redemption.created_at|date:"M d, Y H:i" }}</td>
+                        <td><i class="fas fa-gift"></i> {{ redemption.reward_item.reward_name }}</td>
+                        <td><span style="color: #e74c3c; font-weight: 700;">-{{ redemption.redeemed_points }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+            <p class="empty"><i class="fas fa-gift"></i> No redemptions yet. Check out the Rewards page!</p>
+        {% endif %}
+    </div>
 </section>
 {% endblock %}
