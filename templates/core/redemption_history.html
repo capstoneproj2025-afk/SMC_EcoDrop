@@ -15,10 +15,8 @@
 
 {% block extra_styles %}
 <style>
-.history-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.history-header { display: flex; align-items: center; margin-bottom: 20px; }
 .history-title { display: flex; align-items: center; gap: 10px; font-size: 1.3rem; font-weight: 700; }
-.back-btn { padding: 10px 20px; background: #e0e0e0; color: #333; border-radius: 6px; text-decoration: none; font-weight: 600; transition: all 0.2s; }
-.back-btn:hover { background: #d0d0d0; }
 .redemptions-list { display: flex; flex-direction: column; gap: 16px; }
 .redemption-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); display: flex; gap: 20px; align-items: center; transition: transform 0.2s; }
 .redemption-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
@@ -81,8 +79,6 @@
 
 /* Responsive Styles */
 @media (max-width: 768px) {
-    .history-header { flex-direction: column; align-items: flex-start; gap: 12px; }
-    .back-btn { width: 100%; text-align: center; }
     .redemption-card { flex-direction: column; text-align: center; }
     .reward-icon-box { width: 60px; height: 60px; font-size: 30px; margin: 0 auto; }
     .redemption-meta { justify-content: center; }
@@ -106,9 +102,6 @@
         <div class="history-title">
             <i class="fas fa-history"></i> Redemption History
         </div>
-        <a href="{% url 'rewards' %}" class="back-btn">
-            <i class="fas fa-arrow-left"></i> Back to Rewards
-        </a>
     </div>
 
     {% if redemptions %}
