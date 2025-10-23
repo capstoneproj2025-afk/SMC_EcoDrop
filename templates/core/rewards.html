@@ -16,49 +16,79 @@
 
 {% block extra_styles %}
 <style>
-.rewards-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
-.reward-card { background:#ffffff; border:1px solid #eef2f7; border-radius:12px; padding:16px; text-align:center; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
-.reward-card .icon { font-size: 44px; margin-bottom: 8px; }
-.reward-card .title { font-weight:700; margin-bottom: 4px; }
-.reward-card .req { color:#6b7280; margin-bottom: 12px; }
-.btn { background:#4a90e2; color:#fff; padding:10px 20px; border:none; border-radius:6px; cursor:pointer; text-decoration:none; display:inline-block; }
-.btn:hover { background:#357abd; }
-.btn.disabled { background:#bdc3c7; cursor:not-allowed; }
-.tips { list-style:none; padding:0; margin:0; }
-.tips li { padding: 10px 0; border-bottom: 1px solid #f3f4f6; }
+.rewards-header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; font-size: 1.3rem; font-weight: 700; }
+.points-pill { display: inline-block; background: #e8eaf6; color: #5c6bc0; padding: 10px 20px; border-radius: 20px; font-size: 0.95rem; }
+.points-pill .points-num { color: #3f51b5; font-weight: 700; }
+.rewards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 24px; }
+.reward-card { background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: transform 0.2s; }
+.reward-card:hover { transform: translateY(-4px); box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
+.reward-header { background: #f9dfa2; padding: 40px 20px; text-align: center; position: relative; }
+.reward-header.green { background: #b8e6d5; }
+.reward-header.blue { background: #b3d9ff; }
+.reward-header.purple { background: #d4c5f9; }
+.reward-icon { font-size: 64px; color: rgba(0,0,0,0.15); margin-bottom: 12px; }
+.reward-name { font-size: 1.2rem; font-weight: 700; color: #2c3e50; }
+.reward-body { padding: 20px; }
+.reward-desc { color: #5f6368; font-size: 0.9rem; margin-bottom: 16px; line-height: 1.5; }
+.reward-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.reward-points { display: flex; align-items: center; gap: 6px; color: #5f6368; font-size: 0.9rem; }
+.status-badge { background: #d4edda; color: #155724; padding: 4px 12px; border-radius: 12px; font-size: 0.85rem; font-weight: 600; }
+.status-badge.unavailable { background: #f8d7da; color: #721c24; }
+.redeem-btn { width: 100%; background: #4285f4; color: white; border: none; padding: 12px; border-radius: 6px; font-size: 1rem; font-weight: 600; cursor: pointer; text-align: center; text-decoration: none; display: block; }
+.redeem-btn:hover { background: #3367d6; }
+.redeem-btn:disabled { background: #e0e0e0; color: #9e9e9e; cursor: not-allowed; }
+.tips { list-style: none; padding: 0; margin: 0; }
+.tips li { padding: 12px 0; border-bottom: 1px solid #f3f4f6; }
 </style>
 {% endblock %}
 
 {% block content %}
-            <section class="like-panel">
-                <h1 style="margin: 0 0 6px;"><i class="fas fa-gift"></i> Available Rewards</h1>
-                <p style="margin: 0 0 16px;">You have <span class="points-badge">{{ user_points }} points</span></p>
-                {% if rewards %}
-                <div class="rewards-grid">
-                    {% for reward in rewards %}
-                    <div class="reward-card">
-                        <div class="icon">
-                            {% if reward.image %}
-                                <img src="{{ reward.image.url }}" alt="{{ reward.reward_name }}" style="width: 60px; height: 60px; object-fit: contain;">
-                            {% else %}
-                                <div style="width: 60px; height: 60px; background: #f3f4f6; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #9ca3af; font-size: 10px;">No Image</div>
-                            {% endif %}
-                        </div>
-                        <div class="title">{{ reward.reward_name }}</div>
-                        <div class="req">{{ reward.points_required }} pts required</div>
-                        {% if user_points >= reward.points_required %}
-                            <a href="{% url 'redeem_reward' reward.id %}" class="btn" onclick="return confirm('Redeem {{ reward.reward_name }} for {{ reward.points_required }} points?')">Redeem Now</a>
-                        {% else %}
-                            {% widthratio user_points -1 1 as neg_points %}
-                            <button class="btn disabled" disabled>Need {{ reward.points_required|add:neg_points }} more points</button>
-                        {% endif %}
-                    </div>
-                    {% endfor %}
+<section class="like-panel">
+    <div class="rewards-header">
+        <i class="fas fa-gift"></i> Available Rewards
+    </div>
+    <div class="points-pill">
+        You have <span class="points-num">{{ user_points }} points</span> available
+    </div>
+    
+    {% if rewards %}
+    <div class="rewards-grid">
+        {% for reward in rewards %}
+        <div class="reward-card">
+            <div class="reward-header {% cycle 'green' 'blue' 'purple' '' %}">
+                <div class="reward-icon">
+                    <i class="fas fa-recycle"></i>
                 </div>
+                <div class="reward-name">{{ reward.reward_name }}</div>
+            </div>
+            <div class="reward-body">
+                <div class="reward-desc">
+                    Get a free reward at any participating location
+                </div>
+                <div class="reward-meta">
+                    <div class="reward-points">
+                        <i class="fas fa-lock"></i> {{ reward.points_required }} pts required
+                    </div>
+                    {% if user_points >= reward.points_required %}
+                        <span class="status-badge">Available</span>
+                    {% else %}
+                        <span class="status-badge unavailable">Locked</span>
+                    {% endif %}
+                </div>
+                {% if user_points >= reward.points_required %}
+                    <a href="{% url 'redeem_reward' reward.id %}" class="redeem-btn" onclick="return confirm('Redeem {{ reward.reward_name }} for {{ reward.points_required }} points?')">Redeem Now</a>
                 {% else %}
-                    <p class="empty"><i class="fas fa-gift"></i> No rewards available at the moment. Check back later!</p>
+                    {% widthratio user_points -1 1 as neg_points %}
+                    <button class="redeem-btn" disabled>Need {{ reward.points_required|add:neg_points }} more points</button>
                 {% endif %}
-            </section>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+        <p style="text-align: center; color: #666; padding: 40px;"><i class="fas fa-gift"></i> No rewards available at the moment. Check back later!</p>
+    {% endif %}
+</section>
 
             <section class="like-panel">
                 <h2><i class="fas fa-lightbulb"></i> How to Earn More Points</h2>
