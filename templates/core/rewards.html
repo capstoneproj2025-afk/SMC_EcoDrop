@@ -42,7 +42,13 @@
                 <div class="rewards-grid">
                     {% for reward in rewards %}
                     <div class="reward-card">
-                        <div class="icon">{{ reward.icon }}</div>
+                        <div class="icon">
+                            {% if reward.image %}
+                                <img src="{{ reward.image.url }}" alt="{{ reward.reward_name }}" style="width: 60px; height: 60px; object-fit: contain;">
+                            {% else %}
+                                {{ reward.icon }}
+                            {% endif %}
+                        </div>
                         <div class="title">{{ reward.reward_name }}</div>
                         <div class="req">{{ reward.points_required }} pts required</div>
                         {% if user_points >= reward.points_required %}

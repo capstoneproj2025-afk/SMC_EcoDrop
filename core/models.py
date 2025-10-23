@@ -129,7 +129,8 @@ class RewardItem(models.Model):
     # You can add quantity or status if needed
     # quantity = models.PositiveIntegerField(default=100)
     # is_active = models.BooleanField(default=True)
-    icon = models.CharField(max_length=10, default='🏆') # Added for visual flair
+    icon = models.CharField(max_length=10, default='🏆') # Kept for backward compatibility
+    image = models.ImageField(upload_to='rewards/', null=True, blank=True) # Image for reward icon
 
     def __str__(self):
         return self.reward_name

@@ -361,11 +361,15 @@ def admin_reward_add_view(request):
     if not request.user.is_staff:
         return redirect('dashboard')
     if request.method == 'POST':
-        RewardItem.objects.create(
+        reward = RewardItem.objects.create(
             reward_name=request.POST.get('reward_name'),
             points_required=int(request.POST.get('points_required')),
             icon=request.POST.get('icon', '🏆')
         )
+        # Handle image upload
+        if request.FILES.get('image'):
+            reward.image = request.FILES['image']
+            reward.save()
         return redirect('admin_rewards')
     return render(request, 'core/admin_reward_add.html')
 
