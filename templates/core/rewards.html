@@ -103,7 +103,7 @@
                     {% endif %}
                 </div>
                 {% if user_profile.total_points >= reward.points_required %}
-                    <a href="{% url 'redeem_reward' reward.id %}" class="redeem-btn" onclick="return confirm('Redeem {{ reward.reward_name }} for {{ reward.points_required }} points?')">Redeem Now</a>
+                    <a href="{% url 'redeem_reward' reward.id %}" class="redeem-btn">Redeem Now</a>
                 {% else %}
                     {% widthratio user_profile.total_points -1 1 as neg_points %}
                     <button class="redeem-btn" disabled>Need {{ reward.points_required|add:neg_points }} more points</button>
