@@ -61,7 +61,7 @@ class EntryAdmin(admin.ModelAdmin):
 
 @admin.register(RewardItem)
 class RewardItemAdmin(admin.ModelAdmin):
-    list_display = ('reward_name', 'points_required', 'icon')
+    list_display = ('reward_name', 'points_required', 'image')
     list_filter = ('points_required',)
     search_fields = ('reward_name',)
 

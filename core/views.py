@@ -363,10 +363,9 @@ def admin_reward_add_view(request):
     if request.method == 'POST':
         reward = RewardItem.objects.create(
             reward_name=request.POST.get('reward_name'),
-            points_required=int(request.POST.get('points_required')),
-            icon=request.POST.get('icon', '🏆')
+            points_required=int(request.POST.get('points_required'))
         )
-        # Handle image upload
+        # Handle image upload (now required)
         if request.FILES.get('image'):
             reward.image = request.FILES['image']
             reward.save()
@@ -386,7 +385,9 @@ def admin_reward_edit_view(request, reward_id):
     if request.method == 'POST':
         reward.reward_name = request.POST.get('reward_name')
         reward.points_required = int(request.POST.get('points_required'))
-        reward.icon = request.POST.get('icon', '🏆')
+        # Handle image upload
+        if request.FILES.get('image'):
+            reward.image = request.FILES['image']
         reward.save()
         return redirect('admin_rewards')
     return render(request, 'core/admin_reward_edit.html', {'reward': reward})

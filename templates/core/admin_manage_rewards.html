@@ -125,7 +125,13 @@
       <tbody>
         {% for r in rewards %}
         <tr>
-          <td style="padding:10px;border-bottom:1px solid #e5e7eb; font-size:22px;">{{ r.icon }}</td>
+          <td style="padding:10px;border-bottom:1px solid #e5e7eb;">
+            {% if r.image %}
+              <img src="{{ r.image.url }}" alt="{{ r.reward_name }}" style="width: 40px; height: 40px; object-fit: contain;">
+            {% else %}
+              <span style="color: #9ca3af; font-size: 12px;">No image</span>
+            {% endif %}
+          </td>
           <td style="padding:10px;border-bottom:1px solid #e5e7eb;">{{ r.reward_name }}</td>
           <td style="padding:10px;border-bottom:1px solid #e5e7eb;">{{ r.points_required }}</td>
           <td style="padding:10px;border-bottom:1px solid #e5e7eb;">

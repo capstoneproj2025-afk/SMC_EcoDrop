@@ -93,7 +93,7 @@
         <p style="margin: 0; color: #6b7280; font-size: 14px;">Update reward information</p>
     </div>
 
-    <form method="post">
+    <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
 
         <div class="form-group">
@@ -107,9 +107,15 @@
         </div>
 
         <div class="form-group">
-            <label for="icon">Icon (Emoji)</label>
-            <input type="text" id="icon" name="icon" value="{{ reward.icon }}" maxlength="10" class="form-input">
-            <small style="color: #6b7280; font-size: 12px;">Use an emoji to represent this reward</small>
+            <label for="image">Reward Image *</label>
+            {% if reward.image %}
+                <div style="margin-bottom: 8px;">
+                    <img src="{{ reward.image.url }}" alt="{{ reward.reward_name }}" style="width: 80px; height: 80px; object-fit: contain; border: 1px solid #e5e7eb; border-radius: 8px; padding: 8px;">
+                    <p style="color: #6b7280; font-size: 12px; margin-top: 4px;">Current image</p>
+                </div>
+            {% endif %}
+            <input type="file" id="image" name="image" class="form-input" accept="image/*">
+            <small style="color: #6b7280; font-size: 12px;">Upload a new image {% if not reward.image %}(required){% else %}(leave empty to keep current){% endif %}</small>
         </div>
 
         <div class="form-actions">

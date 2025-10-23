@@ -46,7 +46,7 @@
                             {% if reward.image %}
                                 <img src="{{ reward.image.url }}" alt="{{ reward.reward_name }}" style="width: 60px; height: 60px; object-fit: contain;">
                             {% else %}
-                                {{ reward.icon }}
+                                <div style="width: 60px; height: 60px; background: #f3f4f6; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #9ca3af; font-size: 10px;">No Image</div>
                             {% endif %}
                         </div>
                         <div class="title">{{ reward.reward_name }}</div>
