@@ -60,12 +60,12 @@
         </div>
         
         <div style="margin-bottom: 20px;">
-            <label for="{{ form.student_id.id_for_label }}" style="display: block; margin-bottom: 5px; font-weight: bold;">Student ID (Optional):</label>
-            {{ form.student_id }}
-            {% if form.student_id.errors %}
-                <div style="color: #e74c3c; font-size: 14px; margin-top: 5px;">{{ form.student_id.errors.0 }}</div>
+            <label for="{{ form.school_id.id_for_label }}" style="display: block; margin-bottom: 5px; font-weight: bold;">Student ID (Optional):</label>
+            {{ form.school_id }}
+            {% if form.school_id.errors %}
+                <div style="color: #e74c3c; font-size: 14px; margin-top: 5px;">{{ form.school_id.errors.0 }}</div>
             {% endif %}
-            <small style="color: #666;">{{ form.student_id.help_text }}</small>
+            <small style="color: #666;">{{ form.school_id.help_text }}</small>
         </div>
         
         <div style="margin-bottom: 20px;">

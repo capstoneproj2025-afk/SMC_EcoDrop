@@ -16,7 +16,7 @@ class Command(BaseCommand):
                 self.stdout.write(self.style.SUCCESS(f"Set {user.username} as admin"))
             elif user.is_staff:
                 # Check if they have a faculty ID (SMCIC-)
-                if profile.student_id and profile.student_id.startswith('SMCIC'):
+                if profile.school_id and profile.school_id.startswith('SMCIC'):
                     profile.user_type = 'teacher'
                     self.stdout.write(self.style.SUCCESS(f"Set {user.username} as teacher (has faculty ID)"))
                 else:

@@ -80,7 +80,7 @@
     </div>
     <div>
       <h1 style="margin: 0 0 8px 0; font-size: 1.8rem;">{{ user.first_name }} {{ user.last_name }}</h1>
-      <p style="margin: 0; color: #6b7280;">Teacher/Faculty • {{ user_profile.student_id|default:"No ID" }}</p>
+      <p style="margin: 0; color: #6b7280;">Teacher/Faculty • {{ user_profile.school_id|default:"No ID" }}</p>
     </div>
   </div>
 </section>
@@ -102,7 +102,7 @@
     </div>
     <div class="info-card">
       <div class="info-card-label">Faculty ID</div>
-      <div class="info-card-value">{{ user_profile.student_id|default:"-" }}</div>
+      <div class="info-card-value">{{ user_profile.school_id|default:"-" }}</div>
     </div>
   </div>
 </section>

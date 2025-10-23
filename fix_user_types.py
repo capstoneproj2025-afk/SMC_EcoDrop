@@ -14,7 +14,7 @@ for user in User.objects.all():
         print(f"Set {user.username} as admin")
     elif user.is_staff:
         # Check if they have a faculty ID (SMCIC-)
-        if profile.student_id and profile.student_id.startswith('SMCIC'):
+        if profile.school_id and profile.school_id.startswith('SMCIC'):
             profile.user_type = 'teacher'
             print(f"Set {user.username} as teacher (has faculty ID)")
         else:

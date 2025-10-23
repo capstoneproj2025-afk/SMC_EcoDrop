@@ -12,17 +12,17 @@ import uuid
 
 @admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):
-    list_display = ('user', 'student_id', 'user_type', 'total_points')
-    search_fields = ('user__username', 'user__email', 'student_id', 'qr_code_data')
+    list_display = ('user', 'school_id', 'user_type', 'total_points')
+    search_fields = ('user__username', 'user__email', 'school_id', 'qr_code_data')
     list_filter = ('user_type', 'total_points')
-    # student_id is FULLY EDITABLE - not in readonly_fields
-    fields = ('user', 'student_id', 'user_type', 'id_generation_helper', 'total_points', 'qr_code_data')
+    # school_id is FULLY EDITABLE - not in readonly_fields
+    fields = ('user', 'school_id', 'user_type', 'id_generation_helper', 'total_points', 'qr_code_data')
     readonly_fields = ('id_generation_helper',)
     
     def id_generation_helper(self, obj):
         """Display helper text for ID generation"""
         if obj.user_type == 'student':
-            suggested_id = UserProfile.generate_student_id()
+            suggested_id = UserProfile.generate_school_id()
             return format_html(
                 '<div style="background: #e7f3ff; padding: 10px; border-radius: 5px;">'
                 '<strong>📋 Student ID Format:</strong> C22-0369<br>'

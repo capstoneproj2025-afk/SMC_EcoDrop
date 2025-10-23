@@ -445,9 +445,9 @@ def admin_user_edit_view(request, user_id: int):
         except Exception:
             pass
         # Student/Faculty ID - EDITABLE
-        student_id = request.POST.get('student_id', '').strip()
-        if student_id:
-            user_obj.profile.student_id = student_id
+        school_id = request.POST.get('school_id', '').strip()
+        if school_id:
+            user_obj.profile.school_id = school_id
         user_obj.save()
         user_obj.profile.save()
         return redirect('admin_users')
@@ -503,27 +503,27 @@ def admin_user_add_view(request):
     
     # Get next student ID
     last_student = UserProfile.objects.filter(
-        student_id__startswith=f'C{current_year}-'
-    ).order_by('-student_id').first()
+        school_id__startswith=f'C{current_year}-'
+    ).order_by('-school_id').first()
     
-    if last_student and last_student.student_id:
+    if last_student and last_student.school_id:
         try:
-            last_num = int(last_student.student_id.split('-')[1])
-            next_student_id = f'C{current_year}-{str(last_num + 1).zfill(4)}'
+            last_num = int(last_student.school_id.split('-')[1])
+            next_school_id = f'C{current_year}-{str(last_num + 1).zfill(4)}'
         except:
-            next_student_id = f'C{current_year}-0001'
+            next_school_id = f'C{current_year}-0001'
     else:
-        next_student_id = f'C{current_year}-0001'
+        next_school_id = f'C{current_year}-0001'
     
     # Get next faculty ID (SMCIC-XXX-YYYY format)
     current_year = str(datetime.now().year)  # Full year (e.g., "2025")
     last_faculty = UserProfile.objects.filter(
-        student_id__startswith='SMCIC-'
-    ).order_by('-student_id').first()
+        school_id__startswith='SMCIC-'
+    ).order_by('-school_id').first()
     
-    if last_faculty and last_faculty.student_id:
+    if last_faculty and last_faculty.school_id:
         try:
-            parts = last_faculty.student_id.split('-')
+            parts = last_faculty.school_id.split('-')
             if len(parts) == 3:
                 last_num = int(parts[1])
                 next_faculty_id = f'SMCIC-{str(last_num + 1).zfill(3)}-{current_year}'
@@ -543,23 +543,23 @@ def admin_user_add_view(request):
         user_type = request.POST.get('user_type', 'student')
         
         # Get student/faculty ID from form (EDITABLE - admin can change it)
-        manual_student_id = request.POST.get('student_id', '').strip()
+        manual_school_id = request.POST.get('school_id', '').strip()
         manual_faculty_id = request.POST.get('faculty_id', '').strip()
         
         # Use manual ID if provided, otherwise auto-generate
         if user_type == 'student':
-            if manual_student_id:
+            if manual_school_id:
                 # Use the manually entered ID
-                generated_id = manual_student_id
+                generated_id = manual_school_id
             else:
                 # Auto-generate only if not provided
                 last_student = UserProfile.objects.filter(
-                    student_id__startswith=f'C{current_year}-'
-                ).order_by('-student_id').first()
+                    school_id__startswith=f'C{current_year}-'
+                ).order_by('-school_id').first()
                 
-                if last_student and last_student.student_id:
+                if last_student and last_student.school_id:
                     try:
-                        last_num = int(last_student.student_id.split('-')[1])
+                        last_num = int(last_student.school_id.split('-')[1])
                         generated_id = f'C{current_year}-{str(last_num + 1).zfill(4)}'
                     except:
                         generated_id = f'C{current_year}-0001'
@@ -574,12 +574,12 @@ def admin_user_add_view(request):
                 from datetime import datetime
                 current_year_full = str(datetime.now().year)
                 last_faculty = UserProfile.objects.filter(
-                    student_id__startswith='SMCIC-'
-                ).order_by('-student_id').first()
+                    school_id__startswith='SMCIC-'
+                ).order_by('-school_id').first()
                 
-                if last_faculty and last_faculty.student_id:
+                if last_faculty and last_faculty.school_id:
                     try:
-                        parts = last_faculty.student_id.split('-')
+                        parts = last_faculty.school_id.split('-')
                         if len(parts) == 3:
                             last_num = int(parts[1])
                             generated_id = f'SMCIC-{str(last_num + 1).zfill(3)}-{current_year_full}'
@@ -605,12 +605,12 @@ def admin_user_add_view(request):
                     email=email,
                     is_staff=is_staff
                 )
-                # Get or create profile and update student_id and user_type
+                # Get or create profile and update school_id and user_type
                 profile, created = UserProfile.objects.get_or_create(user=user)
                 profile.user_type = user_type  # Set user type (student, teacher, or staff)
                 if generated_id:
-                    profile.student_id = generated_id
-                    profile.qr_code_data = generated_id  # Set qr_code_data to same value as student_id
+                    profile.school_id = generated_id
+                    profile.qr_code_data = generated_id  # Set qr_code_data to same value as school_id
                 profile.save()
                 
                 user_type_display = {'student': 'Student', 'teacher': 'Teacher/Faculty', 'staff': 'Staff/Admin'}.get(user_type, 'User')
@@ -620,7 +620,7 @@ def admin_user_add_view(request):
                 messages.error(request, f'Error creating user: {str(e)}')
     
     return render(request, 'core/admin_user_add.html', {
-        'next_student_id': next_student_id,
+        'next_school_id': next_school_id,
         'next_faculty_id': next_faculty_id,
     })
 
@@ -869,12 +869,12 @@ def api_user_verify(request):
             profile = None
             lookup_method = None
             
-            # Method 1: Look up by student_id field (exact match with hyphen)
+            # Method 1: Look up by school_id field (exact match with hyphen)
             if not profile:
                 try:
-                    profile = UserProfile.objects.get(student_id=clean_code)
-                    lookup_method = "student_id"
-                    print(f"DEBUG: User found by student_id - {profile.user.username}")
+                    profile = UserProfile.objects.get(school_id=clean_code)
+                    lookup_method = "school_id"
+                    print(f"DEBUG: User found by school_id - {profile.user.username}")
                 except UserProfile.DoesNotExist:
                     pass
             
@@ -883,9 +883,9 @@ def api_user_verify(request):
                 try:
                     # Format: C + 2-digit year + 4-digit number (e.g., C250001 -> C25-0001)
                     formatted_code = f"{clean_code[:3]}-{clean_code[3:]}"
-                    profile = UserProfile.objects.get(student_id=formatted_code)
-                    lookup_method = "student_id_formatted"
-                    print(f"DEBUG: User found by formatted student_id ({formatted_code}) - {profile.user.username}")
+                    profile = UserProfile.objects.get(school_id=formatted_code)
+                    lookup_method = "school_id_formatted"
+                    print(f"DEBUG: User found by formatted school_id ({formatted_code}) - {profile.user.username}")
                 except (UserProfile.DoesNotExist, IndexError):
                     pass
             
@@ -895,18 +895,18 @@ def api_user_verify(request):
                     # Format: SMCIC + 3-digit number + 4-digit year (e.g., SMCIC1232025 -> SMCIC-123-2025)
                     if len(clean_code) == 12:  # SMCIC + 3 digits + 4 digits
                         formatted_code = f"SMCIC-{clean_code[5:8]}-{clean_code[8:]}"
-                        profile = UserProfile.objects.get(student_id=formatted_code)
+                        profile = UserProfile.objects.get(school_id=formatted_code)
                         lookup_method = "faculty_id_formatted"
                         print(f"DEBUG: User found by formatted faculty_id ({formatted_code}) - {profile.user.username}")
                 except (UserProfile.DoesNotExist, IndexError):
                     pass
             
-            # Method 2: Look up by student_id case-insensitive
+            # Method 2: Look up by school_id case-insensitive
             if not profile:
                 try:
-                    profile = UserProfile.objects.get(student_id__iexact=clean_code)
-                    lookup_method = "student_id_case_insensitive"
-                    print(f"DEBUG: User found by student_id (case-insensitive) - {profile.user.username}")
+                    profile = UserProfile.objects.get(school_id__iexact=clean_code)
+                    lookup_method = "school_id_case_insensitive"
+                    print(f"DEBUG: User found by school_id (case-insensitive) - {profile.user.username}")
                 except UserProfile.DoesNotExist:
                     pass
             
@@ -917,11 +917,11 @@ def api_user_verify(request):
                     user = User.objects.get(username=clean_code)
                     profile = user.profile
                     lookup_method = "username"
-                    # Set the student_id if it's missing
-                    if not profile.student_id:
-                        profile.student_id = clean_code
+                    # Set the school_id if it's missing
+                    if not profile.school_id:
+                        profile.school_id = clean_code
                         profile.save()
-                        print(f"DEBUG: Auto-set student_id for {user.username}")
+                        print(f"DEBUG: Auto-set school_id for {user.username}")
                     print(f"DEBUG: User found by username - {profile.user.username}")
                 except (User.DoesNotExist, UserProfile.DoesNotExist):
                     pass
@@ -951,7 +951,7 @@ def api_user_verify(request):
                         'username': profile.user.username,
                         'full_name': f"{profile.user.first_name} {profile.user.last_name}".strip(),
                         'total_points': profile.total_points,
-                        'student_id': profile.student_id or clean_code
+                        'school_id': profile.school_id or clean_code
                     },
                     'lookup_method': lookup_method
                 })
@@ -960,22 +960,22 @@ def api_user_verify(request):
             print(f"DEBUG: No user found for student ID '{clean_code}'")
             
             # Get all existing student IDs and usernames for debugging
-            all_student_ids = list(UserProfile.objects.exclude(
-                student_id__isnull=True
+            all_school_ids = list(UserProfile.objects.exclude(
+                school_id__isnull=True
             ).exclude(
-                student_id=''
-            ).values_list('student_id', 'user__username'))
+                school_id=''
+            ).values_list('school_id', 'user__username'))
             
             all_usernames = list(User.objects.values_list('username', flat=True)[:20])  # Limit to 20
             
-            print(f"DEBUG: All student IDs in database: {all_student_ids}")
+            print(f"DEBUG: All student IDs in database: {all_school_ids}")
             print(f"DEBUG: Sample usernames: {all_usernames}")
             
             # Log failed verification with detailed info
             DeviceLog.objects.create(
                 device=device,
                 log_type='error',
-                message=f"Failed verification: student ID '{clean_code}' not found. Available: {[sid for sid, _ in all_student_ids[:10]]}"
+                message=f"Failed verification: student ID '{clean_code}' not found. Available: {[sid for sid, _ in all_school_ids[:10]]}"
             )
             
             return JsonResponse({
@@ -983,12 +983,12 @@ def api_user_verify(request):
                 'message': f'Student ID not found: {clean_code}',
                 'ok': False,
                 'debug': {
-                    'received_student_id': clean_code,
+                    'received_school_id': clean_code,
                     'original_input': code,
-                    'available_student_ids': [sid for sid, username in all_student_ids],
+                    'available_school_ids': [sid for sid, username in all_school_ids],
                     'available_usernames': all_usernames,
                     'total_users': UserProfile.objects.count(),
-                    'users_with_student_id': UserProfile.objects.exclude(student_id__isnull=True).exclude(student_id='').count()
+                    'users_with_school_id': UserProfile.objects.exclude(school_id__isnull=True).exclude(school_id='').count()
                 }
             })
                 
@@ -1026,13 +1026,13 @@ def generate_qr_code_view(request):
     from django.http import HttpResponse
     
     user_profile = request.user.profile
-    student_id = user_profile.student_id
+    school_id = user_profile.school_id
     
-    if not student_id:
+    if not school_id:
         return HttpResponse("No Student ID found", status=404)
     
     # Remove hyphens for barcode (barcodes work better with alphanumeric without special chars)
-    barcode_data = student_id.replace('-', '')
+    barcode_data = school_id.replace('-', '')
     
     # Generate Code128 barcode (supports alphanumeric)
     try:
@@ -1053,7 +1053,7 @@ def generate_qr_code_view(request):
         
         # Return as image
         response = HttpResponse(buffer, content_type='image/png')
-        response['Content-Disposition'] = f'inline; filename="{student_id}_barcode.png"'
+        response['Content-Disposition'] = f'inline; filename="{school_id}_barcode.png"'
         return response
     except Exception as e:
         return HttpResponse(f"Error generating barcode: {str(e)}", status=500)
@@ -1074,7 +1074,7 @@ def download_id_card_view(request, user_id):
     try:
         user = User.objects.get(id=user_id)
         profile = user.profile
-        student_id = profile.student_id or "NO-ID"
+        school_id = profile.school_id or "NO-ID"
         
         # Create ID card image (1012 x 638 pixels)
         width, height = 1012, 638
@@ -1103,10 +1103,10 @@ def download_id_card_view(request, user_id):
         draw.text((width//2, 250), full_name, fill='#1e40af', font=name_font, anchor='mm')
         
         # Student ID
-        draw.text((width//2, 320), f"ID: {student_id}", fill='black', font=info_font, anchor='mm')
+        draw.text((width//2, 320), f"ID: {school_id}", fill='black', font=info_font, anchor='mm')
         
         # Generate barcode
-        barcode_data = student_id.replace('-', '')
+        barcode_data = school_id.replace('-', '')
         code128 = barcode.get_barcode_class('code128')
         barcode_instance = code128(barcode_data, writer=ImageWriter())
         
@@ -1131,7 +1131,7 @@ def download_id_card_view(request, user_id):
         response_buffer.seek(0)
         
         response = HttpResponse(response_buffer, content_type='image/png')
-        response['Content-Disposition'] = f'attachment; filename="{student_id}_ID_Card.png"'
+        response['Content-Disposition'] = f'attachment; filename="{school_id}_ID_Card.png"'
         return response
         
     except Exception as e:

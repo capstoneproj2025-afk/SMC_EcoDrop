@@ -124,10 +124,10 @@
         </div>
 
         <div class="form-group">
-            <label for="student_id">
+            <label for="school_id">
                 {% if u.profile.user_type == 'student' %}Student ID{% elif u.profile.user_type == 'teacher' %}Faculty ID{% else %}ID Number{% endif %}
             </label>
-            <input type="text" id="student_id" name="student_id" value="{{ u.profile.student_id }}" class="form-input" 
+            <input type="text" id="school_id" name="school_id" value="{{ u.profile.school_id }}" class="form-input" 
                    placeholder="{% if u.profile.user_type == 'student' %}e.g., C25-0001{% elif u.profile.user_type == 'teacher' %}e.g., SMCIC-001-0001{% else %}Optional ID{% endif %}">
             <!-- Format helper text hidden -->
             <!-- <small style="color: #667eea; font-size: 12px; display: block; margin-top: 4px;">
@@ -162,7 +162,7 @@
     </form>
 </section>
 
-{% if u.profile.user_type != 'admin' and u.profile.student_id %}
+{% if u.profile.user_type != 'admin' and u.profile.school_id %}
 <section class="like-panel" style="max-width: 800px;">
     <h2 style="margin: 0 0 16px;">
         {% if u.profile.user_type == 'student' %}Student ID Card{% else %}Faculty ID Card{% endif %}
@@ -173,13 +173,13 @@
         <img src="{% url 'download_id_card' u.id %}" alt="ID Card Preview" style="max-width: 100%; border: 2px solid #e5e7eb; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
         
         <div style="margin-top: 20px;">
-            <a href="{% url 'download_id_card' u.id %}" download="{{ u.profile.student_id }}_ID_Card.png" class="btn btn-primary" style="display: inline-block; padding: 12px 24px; background: #28a745; color: white; text-decoration: none; border-radius: 8px; font-weight: 600;">
+            <a href="{% url 'download_id_card' u.id %}" download="{{ u.profile.school_id }}_ID_Card.png" class="btn btn-primary" style="display: inline-block; padding: 12px 24px; background: #28a745; color: white; text-decoration: none; border-radius: 8px; font-weight: 600;">
                 📥 Download ID Card
             </a>
         </div>
         
         <p style="margin-top: 12px; color: #6b7280; font-size: 14px;">
-            {% if u.profile.user_type == 'student' %}Student ID{% else %}Faculty ID{% endif %}: <strong>{{ u.profile.student_id }}</strong>
+            {% if u.profile.user_type == 'student' %}Student ID{% else %}Faculty ID{% endif %}: <strong>{{ u.profile.school_id }}</strong>
         </p>
     </div>
 </section>

@@ -19,16 +19,16 @@ class UserProfile(models.Model):
     
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     total_points = models.PositiveIntegerField(default=0)
-    # This field will store the student/faculty ID number
+    # School ID Number - Works for ALL user types (students, teachers, admins)
     # Format: C22-0369 for students (C=class, 22=year, 0369=student number)
-    # Format: SMCIC-***-**** for faculty
-    # This field is EDITABLE - can be manually set or auto-generated
-    student_id = models.CharField(
+    # Format: SMCIC-***-**** for faculty/teachers
+    school_id = models.CharField(
         max_length=50, 
         unique=True, 
         blank=True, 
         null=True,
-        help_text="Student: C22-0369 | Faculty: SMCIC-001-0001 | Editable"
+        help_text="School ID (Students: C22-0369 | Faculty: SMCIC-001-0001)",
+        verbose_name="School ID Number"
     )
     # Keep the old field for backward compatibility
     qr_code_data = models.CharField(max_length=100, unique=True, blank=True, null=True)
@@ -51,12 +51,12 @@ class UserProfile(models.Model):
         # Get the last student ID for this year
         last_student = UserProfile.objects.filter(
             user_type='student',
-            student_id__startswith=f'C{year:02d}-'
-        ).order_by('-student_id').first()
+            school_id__startswith=f'C{year:02d}-'
+        ).order_by('-school_id').first()
         
-        if last_student and last_student.student_id:
+        if last_student and last_student.school_id:
             try:
-                last_number = int(last_student.student_id.split('-')[1])
+                last_number = int(last_student.school_id.split('-')[1])
                 next_number = last_number + 1
             except (IndexError, ValueError):
                 next_number = 1
@@ -74,12 +74,12 @@ class UserProfile(models.Model):
         # Get the last faculty ID
         last_faculty = UserProfile.objects.filter(
             user_type='teacher',
-            student_id__startswith='SMCIC-'
-        ).order_by('-student_id').first()
+            school_id__startswith='SMCIC-'
+        ).order_by('-school_id').first()
         
-        if last_faculty and last_faculty.student_id:
+        if last_faculty and last_faculty.school_id:
             try:
-                parts = last_faculty.student_id.split('-')
+                parts = last_faculty.school_id.split('-')
                 if len(parts) >= 3:
                     dept_num = int(parts[1])
                     seq_num = int(parts[2])
@@ -98,16 +98,16 @@ class UserProfile(models.Model):
         Override save to optionally auto-generate ID if not provided
         Admin can still manually set the ID
         """
-        # Only auto-generate if student_id is empty and user wants it
+        # Only auto-generate if school_id is empty and user wants it
         # This is OPTIONAL - can be skipped
-        if not self.student_id:
+        if not self.school_id:
             if self.user_type == 'student':
                 # Uncomment next line if you want auto-generation by default
-                # self.student_id = self.generate_student_id()
+                # self.school_id = self.generate_student_id()
                 pass  # Leave empty - admin will fill it manually
             elif self.user_type == 'teacher':
                 # Uncomment next line if you want auto-generation by default
-                # self.student_id = self.generate_faculty_id()
+                # self.school_id = self.generate_faculty_id()
                 pass  # Leave empty - admin will fill it manually
         
         super().save(*args, **kwargs)

@@ -134,12 +134,12 @@
       </select>
     </div>
     
-    <div class="form-group" id="student_id_group">
+    <div class="form-group" id="school_id_group">
       <label>Student ID</label>
-      <input type="text" name="student_id" id="student_id" value="{{ next_student_id }}" placeholder="e.g., C25-0001">
+      <input type="text" name="school_id" id="school_id" value="{{ next_school_id }}" placeholder="e.g., C25-0001">
       <!-- Format helper text hidden -->
       <!-- <small style="color: #667eea; font-size: 13px; display: block; margin-top: 4px;">
-         Format: C22-0369 (C=class, 22=year, 0369=student number) | Suggested: {{ next_student_id }} | Editable
+         Format: C22-0369 (C=class, 22=year, 0369=student number) | Suggested: {{ next_school_id }} | Editable
       </small> -->
     </div>
     
@@ -162,7 +162,7 @@
 <script>
   function toggleStudentId() {
     const userType = document.getElementById('user_type').value;
-    const studentIdGroup = document.getElementById('student_id_group');
+    const studentIdGroup = document.getElementById('school_id_group');
     const facultyIdGroup = document.getElementById('faculty_id_group');
     
     // Hide both first

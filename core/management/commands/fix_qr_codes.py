@@ -10,23 +10,23 @@ class Command(BaseCommand):
         parser.add_argument(
             '--set-student-id',
             type=str,
-            help='Set student ID for a specific username (format: username:student_id)',
+            help='Set student ID for a specific username (format: username:school_id)',
         )
 
     def handle(self, *args, **options):
-        if options['set_student_id']:
+        if options['set_school_id']:
             # Set specific student ID
             try:
-                username, student_id = options['set_student_id'].split(':')
+                username, school_id = options['set_school_id'].split(':')
                 user = User.objects.get(username=username)
-                user.profile.student_id = student_id
+                user.profile.school_id = school_id
                 user.profile.save()
                 self.stdout.write(
-                    self.style.SUCCESS(f'Set student ID for {username}: {student_id}')
+                    self.style.SUCCESS(f'Set student ID for {username}: {school_id}')
                 )
             except ValueError:
                 self.stdout.write(
-                    self.style.ERROR('Format should be: --set-student-id username:student_id')
+                    self.style.ERROR('Format should be: --set-student-id username:school_id')
                 )
             except User.DoesNotExist:
                 self.stdout.write(
@@ -44,27 +44,27 @@ class Command(BaseCommand):
             try:
                 profile = user.profile
                 
-                # Set student_id to username if missing (default behavior)
-                if not profile.student_id:
-                    profile.student_id = user.username
+                # Set school_id to username if missing (default behavior)
+                if not profile.school_id:
+                    profile.school_id = user.username
                     profile.save()
                     self.stdout.write(
-                        self.style.SUCCESS(f'Set student ID for {user.username}: {profile.student_id}')
+                        self.style.SUCCESS(f'Set student ID for {user.username}: {profile.school_id}')
                     )
                     fixed_count += 1
                 
                 # Show current status
-                self.stdout.write(f'{user.username}: student_id={profile.student_id}, points={profile.total_points}')
+                self.stdout.write(f'{user.username}: school_id={profile.school_id}, points={profile.total_points}')
                 
             except UserProfile.DoesNotExist:
                 # Create profile if it doesn't exist
                 UserProfile.objects.create(
                     user=user,
-                    student_id=user.username,  # Default to username
+                    school_id=user.username,  # Default to username
                     qr_code_data=f"SMC-USER-{user.username}-{str(uuid.uuid4())[:8]}"
                 )
                 self.stdout.write(
-                    self.style.WARNING(f'Created profile for {user.username} with student_id: {user.username}')
+                    self.style.WARNING(f'Created profile for {user.username} with school_id: {user.username}')
                 )
                 fixed_count += 1
         
@@ -73,4 +73,4 @@ class Command(BaseCommand):
         )
         
         self.stdout.write("\nTo set a specific student ID, use:")
-        self.stdout.write("python manage.py fix_qr_codes --set-student-id username:student_id_number")
+        self.stdout.write("python manage.py fix_qr_codes --set-student-id username:school_id_number")

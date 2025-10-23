@@ -14,11 +14,11 @@ class RegisterForm(UserCreationForm):
     email = forms.EmailField(required=True)
     first_name = forms.CharField(max_length=30, required=True)
     last_name = forms.CharField(max_length=30, required=True)
-    student_id = forms.CharField(max_length=20, required=False, help_text="Optional: Your student ID")
+    school_id = forms.CharField(max_length=20, required=False, help_text="Optional: Your student ID")
     
     class Meta:
         model = User
-        fields = ("username", "first_name", "last_name", "email", "student_id", "password1", "password2")
+        fields = ("username", "first_name", "last_name", "email", "school_id", "password1", "password2")
     
     def save(self, commit=True):
         user = super().save(commit=False)
