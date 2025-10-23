@@ -10,6 +10,7 @@ cycler==0.12.1
 deprecation==2.1.0
 dj-database-url==3.0.1
 Django==5.0.6
+django-cloudinary-storage==0.3.0
 django-cors-headers==4.9.0
 filelock==3.20.0
 fonttools==4.60.1
