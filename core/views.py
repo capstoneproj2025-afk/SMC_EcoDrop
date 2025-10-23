@@ -272,19 +272,27 @@ def redemption_history_view(request):
     """Display user's redemption history (only valid/non-expired redemptions)"""
     from django.utils import timezone
     from datetime import timedelta
+    from django.core.paginator import Paginator
     
     user_profile = request.user.profile
     
     # Only show redemptions from the last 3 days (valid redemptions)
+    # Order by created_at ascending (oldest first) so items expiring soonest are at top
     three_days_ago = timezone.now() - timedelta(days=3)
     redemptions = RedeemedPoints.objects.filter(
         user_profile=user_profile,
         created_at__gte=three_days_ago
-    ).select_related('reward_item').order_by('-created_at')
+    ).select_related('reward_item').order_by('created_at')  # Oldest first = expires soonest
+    
+    # Paginate results (10 per page)
+    paginator = Paginator(redemptions, 10)
+    page_number = request.GET.get('page', 1)
+    page_obj = paginator.get_page(page_number)
     
     return render(request, 'core/redemption_history.html', {
-        'redemptions': redemptions,
+        'redemptions': page_obj,
         'user_profile': user_profile,
+        'page_obj': page_obj,
     })
 
 @login_required

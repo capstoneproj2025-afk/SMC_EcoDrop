@@ -37,6 +37,11 @@
 .empty-state a:hover { text-decoration: underline; }
 .view-receipt-btn { padding: 8px 16px; background: #4285f4; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; transition: all 0.2s; }
 .view-receipt-btn:hover { background: #3367d6; }
+.pagination { display: flex; justify-content: center; align-items: center; gap: 5px; margin-top: 30px; flex-wrap: wrap; }
+.pagination .page-btn { padding: 8px 14px; border: 1px solid #dee2e6; background: white; color: #333; text-decoration: none; border-radius: 4px; font-size: 0.9rem; transition: all 0.2s; cursor: pointer; }
+.pagination a.page-btn:hover { background: #e9ecef; border-color: #adb5bd; }
+.pagination .page-btn.active { background: #4285f4; color: white; border-color: #4285f4; font-weight: 600; }
+.pagination .page-btn.disabled { background: #f8f9fa; color: #adb5bd; cursor: not-allowed; border-color: #dee2e6; }
 
 /* Receipt Modal */
 .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center; }
@@ -143,6 +148,35 @@
             </div>
             {% endfor %}
         </div>
+        
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+        <div class="pagination">
+            {% if page_obj.has_previous %}
+                <a href="?page=1" class="page-btn">First</a>
+                <a href="?page={{ page_obj.previous_page_number }}" class="page-btn">Previous</a>
+            {% else %}
+                <span class="page-btn disabled">First</span>
+                <span class="page-btn disabled">Previous</span>
+            {% endif %}
+            
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                    <span class="page-btn active">{{ num }}</span>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <a href="?page={{ num }}" class="page-btn">{{ num }}</a>
+                {% endif %}
+            {% endfor %}
+            
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}" class="page-btn">Next</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}" class="page-btn">Last</a>
+            {% else %}
+                <span class="page-btn disabled">Next</span>
+                <span class="page-btn disabled">Last</span>
+            {% endif %}
+        </div>
+        {% endif %}
     {% else %}
         <div class="empty-state">
             <div><i class="fas fa-receipt"></i></div>
@@ -165,8 +199,6 @@
         <div class="receipt-body">
             <div class="receipt-divider"></div>
             <div class="receipt-reward">
-                <img id="receiptRewardImage" src="" alt="" style="width: 100px; height: 100px; object-fit: contain; margin-bottom: 10px; display: none;">
-                <div class="receipt-reward-icon" id="receiptRewardIcon"><i class="fas fa-recycle"></i></div>
                 <div class="receipt-reward-name" id="receiptRewardName">Coffee Voucher</div>
             </div>
             <div class="receipt-divider"></div>
@@ -213,36 +245,21 @@
         if (e.target.closest('.view-receipt-btn')) {
             var btn = e.target.closest('.view-receipt-btn');
             var rewardName = btn.getAttribute('data-reward-name');
-            var rewardImage = btn.getAttribute('data-reward-image');
             var receiptNumber = btn.getAttribute('data-receipt-number');
             var redemptionDate = btn.getAttribute('data-redemption-date');
             var validUntil = btn.getAttribute('data-valid-until');
             var points = btn.getAttribute('data-points');
             
-            showReceipt(rewardName, rewardImage, receiptNumber, redemptionDate, validUntil, points);
+            showReceipt(rewardName, receiptNumber, redemptionDate, validUntil, points);
         }
     });
     
-    function showReceipt(rewardName, rewardImage, receiptNumber, redemptionDate, validUntil, points) {
+    function showReceipt(rewardName, receiptNumber, redemptionDate, validUntil, points) {
         document.getElementById('receiptRewardName').textContent = rewardName;
         document.getElementById('receiptNumber').textContent = receiptNumber;
         document.getElementById('receiptDate').textContent = redemptionDate;
         document.getElementById('receiptValidUntil').textContent = validUntil;
         document.getElementById('receiptPoints').textContent = points;
-        
-        // Show image if available, otherwise show icon
-        var imgElement = document.getElementById('receiptRewardImage');
-        var iconElement = document.getElementById('receiptRewardIcon');
-        if (rewardImage && rewardImage.trim() !== '') {
-            imgElement.src = rewardImage;
-            imgElement.alt = rewardName;
-            imgElement.style.display = 'block';
-            iconElement.style.display = 'none';
-        } else {
-            imgElement.style.display = 'none';
-            iconElement.style.display = 'block';
-        }
-        
         document.getElementById('receiptModal').classList.add('active');
     }
     

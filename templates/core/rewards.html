@@ -397,11 +397,6 @@
         <div class="receipt-body">
             <div class="receipt-divider"></div>
             <div class="receipt-reward">
-                {% if last_redemption.reward_image %}
-                <img src="{{ last_redemption.reward_image }}" alt="{{ last_redemption.reward_name }}" style="width: 100px; height: 100px; object-fit: contain; margin-bottom: 10px;">
-                {% else %}
-                <div class="receipt-reward-icon"><i class="fas fa-recycle"></i></div>
-                {% endif %}
                 <div class="receipt-reward-name">{{ last_redemption.reward_name }}</div>
             </div>
             <div class="receipt-divider"></div>
