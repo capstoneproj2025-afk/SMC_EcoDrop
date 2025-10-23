@@ -227,7 +227,7 @@ def admin_dashboard_view(request):
     # User statistics
     total_users = UserProfile.objects.count()
     student_users = UserProfile.objects.filter(user__is_staff=False).count()
-    staff_users = UserProfile.objects.filter(user__is_staff=True).count()
+    faculty_users = UserProfile.objects.filter(user__is_staff=True).count()
     
     # Recycling statistics
     total_bottles = Entry.objects.aggregate(total=Sum('no_bottle'))['total'] or 0
@@ -275,7 +275,7 @@ def admin_dashboard_view(request):
     context = {
         'total_users': total_users,
         'student_users': student_users,
-        'staff_users': staff_users,
+        'faculty_users': faculty_users,
         'total_bottles': total_bottles,
         'total_points_earned': total_points_earned,
         'total_points_redeemed': total_points_redeemed,
