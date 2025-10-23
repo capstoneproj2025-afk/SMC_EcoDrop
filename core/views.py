@@ -181,13 +181,33 @@ def student_profile_view(request):
 
 @login_required
 def rewards_view(request):
-    """Display available rewards for redemption"""
-    rewards = RewardItem.objects.all().order_by('points_required')
+    """Display available rewards for redemption with search and pagination"""
+    from django.core.paginator import Paginator
+    from django.db.models import Q
+    
     user_profile = request.user.profile
     
+    # Get search query
+    search_query = request.GET.get('search', '')
+    
+    # Filter rewards based on search
+    rewards = RewardItem.objects.all().order_by('points_required')
+    if search_query:
+        rewards = rewards.filter(
+            Q(reward_name__icontains=search_query) |
+            Q(points_required__icontains=search_query)
+        )
+    
+    # Paginate results (9 per page for 3x3 grid)
+    paginator = Paginator(rewards, 9)
+    page_number = request.GET.get('page', 1)
+    page_obj = paginator.get_page(page_number)
+    
     return render(request, 'core/rewards.html', {
-        'rewards': rewards,
+        'rewards': page_obj,
         'user_profile': user_profile,
+        'search_query': search_query,
+        'page_obj': page_obj,
     })
 
 @login_required
