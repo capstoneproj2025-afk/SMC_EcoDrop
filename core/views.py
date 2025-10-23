@@ -137,13 +137,8 @@ def teacher_dashboard_view(request):
     # Recent transactions
     recent_transactions = Entry.objects.select_related('user_profile__user').order_by('-created_at')[:20]
     
-    # Teacher's own recent entries and redemptions (only valid ones - within 3 days)
+    # Teacher's own recent entries
     recent_entries = Entry.objects.filter(user_profile=user_profile).order_by('-created_at')[:10]
-    three_days_ago = timezone.now() - timedelta(days=3)
-    redemptions = RedeemedPoints.objects.filter(
-        user_profile=user_profile,
-        created_at__gte=three_days_ago
-    ).select_related('reward_item').order_by('-created_at')[:10]
     
     return render(request, 'core/teacher_dashboard.html', {
         'user_profile': user_profile,
@@ -156,7 +151,6 @@ def teacher_dashboard_view(request):
         'top_students': top_students,
         'recent_transactions': recent_transactions,
         'recent_entries': recent_entries,
-        'redemptions': redemptions,
     })
 
 @login_required
