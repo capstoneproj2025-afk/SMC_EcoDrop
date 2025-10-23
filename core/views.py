@@ -94,7 +94,7 @@ def dashboard_view(request):
     
     # Regular student dashboard
     user_profile = request.user.profile
-    recent_entries = Entry.objects.filter(user_profile=user_profile).order_by('-created_at')[:5]
+    recent_entries = Entry.objects.filter(user_profile=user_profile).order_by('-created_at')[:10]
     total_bottles = Entry.objects.filter(user_profile=user_profile).aggregate(total=models.Sum('no_bottle'))['total'] or 0
     
     return render(request, 'core/dashboard.html', {
