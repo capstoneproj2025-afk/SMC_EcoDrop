@@ -354,45 +354,8 @@
             closeRedeemModal();
         }
     });
-    
-    {% if last_redemption %}
-    // Auto-show success modal after redemption and set up event listeners
-    window.addEventListener('DOMContentLoaded', function() {
-        var successModal = document.getElementById('successModal');
-        if (successModal) {
-            successModal.classList.add('active');
-            
-            // Success modal close handlers
-            function closeSuccessModal() {
-                successModal.classList.remove('active');
-            }
-            
-            var successCloseBtn = document.getElementById('successCloseBtn');
-            if (successCloseBtn) {
-                successCloseBtn.addEventListener('click', closeSuccessModal);
-            }
-            
-            var successDoneBtn = document.getElementById('successDoneBtn');
-            if (successDoneBtn) {
-                successDoneBtn.addEventListener('click', closeSuccessModal);
-            }
-            
-            successModal.addEventListener('click', function(e) {
-                if (e.target === this) {
-                    closeSuccessModal();
-                }
-            });
-            
-            // Close on Escape
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape') {
-                    closeSuccessModal();
-                }
-            });
-        }
-    });
-    {% endif %}
 })();
+
 </script>
 
 <!-- Success Modal (shown after redemption) -->
@@ -448,5 +411,39 @@
         </div>
     </div>
 </div>
+
+<script>
+// Success modal event listeners (only runs if modal exists)
+(function() {
+    var successModal = document.getElementById('successModal');
+    if (successModal) {
+        function closeSuccessModal() {
+            successModal.classList.remove('active');
+        }
+        
+        var successCloseBtn = document.getElementById('successCloseBtn');
+        if (successCloseBtn) {
+            successCloseBtn.addEventListener('click', closeSuccessModal);
+        }
+        
+        var successDoneBtn = document.getElementById('successDoneBtn');
+        if (successDoneBtn) {
+            successDoneBtn.addEventListener('click', closeSuccessModal);
+        }
+        
+        successModal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeSuccessModal();
+            }
+        });
+        
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && successModal.classList.contains('active')) {
+                closeSuccessModal();
+            }
+        });
+    }
+})();
+</script>
 {% endif %}
 {% endblock %}
